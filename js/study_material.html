@@ -1,0 +1,1316 @@
+<!-- ===================================================
+     EDU PORTAL - STUDY MATERIAL & SECTIONS (study_material.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar (VRTX White Style) */
+  .sm-sub-header {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sm-sub-header::-webkit-scrollbar { display: none; }
+
+  .sm-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .sm-tab-btn:hover { color: var(--primary); }
+  .sm-tab-btn.active { color: var(--primary) !important; font-weight: 600; }
+  .sm-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2.5px; background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Section Tiles Grid (Level 1) */
+  .sm-section-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .sm-section-tile {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    aspect-ratio: 1;
+  }
+
+  .sm-section-tile:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  }
+
+  .sm-tile-count-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  }
+
+  .sm-tile-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .sm-tile-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* File Material Card Grid (Level 2) */
+  .sm-files-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .sm-file-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .sm-file-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+
+  .sm-file-cover-wrapper {
+    width: 100%;
+    height: 110px;
+    background-color: var(--bg-body);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sm-file-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sm-file-type-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: rgba(15, 23, 42, 0.75);
+    color: #ffffff;
+  }
+
+  .sm-file-lock-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #f59e0b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sm-file-card-content {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .sm-file-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    word-break: break-word;
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sm-file-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .sm-file-card-actions {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-body);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  @media (max-width: 1200px) {
+    .sm-section-tiles-grid { grid-template-columns: repeat(3, 1fr); }
+    .sm-files-tiles-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    /* Mobile View: Exactly 2 Tiles in a Line! */
+    .sm-section-tiles-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .sm-files-tiles-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
+</style>
+
+<div class="sm-wrapper">
+
+  <!-- 1. FIXED SUB-HEADER -->
+  <div class="sm-sub-header">
+    <div style="font-weight: 700; font-size: 14px; border-right: 1px solid var(--border-color); padding-right:14px; display:flex; align-items:center; gap:6px;">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+      <span>Study Material</span>
+    </div>
+    
+    <button id="sm-tab-library" class="sm-tab-btn active" onclick="switchSmTab('library')">
+      <span>Material Library</span>
+    </button>
+
+    <button id="sm-tab-section" class="sm-tab-btn" onclick="switchSmTab('section')">
+      <span>Section</span>
+    </button>
+  </div>
+
+
+  <!-- ===================================================
+       SUB-PAGE 1: MATERIAL LIBRARY
+       =================================================== -->
+  <div id="sub-page-material-library" class="sm-sub-page">
+    
+    <!-- Filter & Action Bar Card -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap; margin-bottom:12px;">
+        <div class="flex items-center gap-2">
+          <!-- Add Material Button -->
+          <button class="btn btn-primary" id="btn-add-material-main" onclick="openAddMaterialModal()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Add New Material</span>
+          </button>
+        </div>
+
+        <div style="font-size:12px; color:var(--text-muted);" id="sm-active-view-label">Sections Overview</div>
+      </div>
+
+      <!-- Filters Grid -->
+      <div class="qb-filter-grid">
+        <div>
+          <label class="filter-label">Select Class</label>
+          <select id="sm-filter-class" class="filter-control w-full" onchange="onSmFilterClassSubjectChange()">
+            <option value="All">All Classes</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Subject</label>
+          <select id="sm-filter-subject" class="filter-control w-full" onchange="onSmFilterClassSubjectChange()">
+            <option value="All">All Subjects</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Biology">Biology</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Chapter</label>
+          <select id="sm-filter-chapter" class="filter-control w-full">
+            <option value="All">All Chapters</option>
+          </select>
+        </div>
+
+        <div style="flex:2;">
+          <label class="filter-label">Search Material</label>
+          <input type="text" id="sm-filter-search" class="filter-control w-full" placeholder="Search file name, section...">
+        </div>
+
+        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+          <button class="btn btn-primary w-full" id="btn-sm-search" onclick="applySmFilterSearch()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <span>Search</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- LEVEL 1: SECTIONS SQUARE TILES GRID -->
+    <div id="sm-sections-overview-container">
+      <div class="sm-section-tiles-grid" id="sm-section-tiles-list">
+        <div class="card" style="text-align:center; padding:30px; color:var(--text-muted);">Loading sections...</div>
+      </div>
+    </div>
+
+
+    <!-- LEVEL 2: SECTION FILES DETAIL VIEW -->
+    <div id="sm-files-detail-container" class="hidden">
+      
+      <!-- Back & View Switcher Bar -->
+      <div class="card" style="margin-bottom: 16px; padding: 12px 18px;">
+        <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap;">
+          <div class="flex items-center gap-2">
+            <button class="btn btn-secondary" onclick="closeSectionDetailView()" style="padding:6px 12px;">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+              <span>Back to Sections</span>
+            </button>
+            <div style="font-size:16px; font-weight:700; color:var(--text-main);" id="sm-active-section-title">Section Name</div>
+          </div>
+
+          <!-- Format Switcher Buttons: Tiles (Default) vs List -->
+          <div class="flex items-center gap-1">
+            <button class="btn btn-primary" id="btn-fmt-tiles" onclick="switchFilesFormat('tiles')" style="padding:5px 10px; font-size:12px;">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+              <span>Tiles</span>
+            </button>
+
+            <button class="btn btn-secondary" id="btn-fmt-list" onclick="switchFilesFormat('list')" style="padding:5px 10px; font-size:12px;">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+              <span>List View</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A. TILES VIEW (Square Cards) -->
+      <div id="sm-files-grid-view">
+        <div class="sm-files-tiles-grid" id="sm-files-tiles-list"></div>
+      </div>
+
+      <!-- B. LIST VIEW (Responsive Table) -->
+      <div id="sm-files-list-view" class="hidden">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Sr.</th>
+                  <th>File Name</th>
+                  <th>File Size</th>
+                  <th>File Type</th>
+                  <th style="text-align:center; width: 120px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="sm-files-table-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       SUB-PAGE 2: SECTION MANAGEMENT PAGE
+       =================================================== -->
+  <div id="sub-page-section" class="qb-sub-page hidden">
+    
+    <div class="card">
+      <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap; margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="openAddSectionModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Add Section</span>
+        </button>
+
+        <div style="max-width:300px; width:100%;">
+          <input type="text" id="sec-search-input" class="filter-control w-full" placeholder="Search section..." oninput="loadSectionsTable()">
+        </div>
+      </div>
+
+      <!-- Sections Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">Sr.</th>
+              <th>Section Name</th>
+              <th>No. of Files</th>
+              <th style="width:80px; text-align:center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="sections-table-tbody">
+            <tr><td colspan="4" style="text-align:center; padding:20px;">Loading sections...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===================================================
+     MODALS & DIALOG BOXES
+     =================================================== -->
+
+<!-- 1. ADD / EDIT MATERIAL MODAL -->
+<div id="modal-add-material" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 600px;">
+    <div class="modal-header" id="mat-modal-title">Add New Material</div>
+    
+    <form onsubmit="event.preventDefault(); submitSaveMaterial();">
+      <input type="hidden" id="mat-form-id" value="">
+      <input type="hidden" id="mat-form-file-url" value="">
+      <input type="hidden" id="mat-form-file-id" value="">
+      <input type="hidden" id="mat-form-file-size" value="">
+      <input type="hidden" id="mat-form-file-type" value="">
+      <input type="hidden" id="mat-form-cover-url" value="">
+
+      <!-- Row 1: Class, Subject, Chapter -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div>
+          <label class="filter-label">Class *</label>
+          <select id="mat-form-class" class="filter-control w-full" onchange="onMatModalClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Subject *</label>
+          <select id="mat-form-subject" class="filter-control w-full" onchange="onMatModalClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Biology">Biology</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div>
+          <label class="filter-label">Chapter (Optional)</label>
+          <select id="mat-form-chapter" class="filter-control w-full">
+            <option value="">Select chapter (optional)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Section *</label>
+          <select id="mat-form-section" class="filter-control w-full" required>
+            <option value="" disabled selected hidden>Select section</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- File Upload Box -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Upload File from Gallery or Drag *</label>
+        <input type="file" id="mat-file-input" class="filter-control w-full" onchange="handleMaterialFileUpload(event)">
+        <div id="mat-file-status-text" style="font-size:11.5px; color:var(--primary); margin-top:4px;"></div>
+      </div>
+
+      <!-- File Name -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">File Name <span class="required">*</span></label>
+        <input type="text" id="mat-form-name" class="filter-control w-full" placeholder="Enter file name" required>
+      </div>
+
+      <!-- Cover Image (Optional) -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Upload Image Cover (Optional)</label>
+        <input type="file" id="mat-cover-input" class="filter-control w-full" accept="image/*" onchange="handleMaterialCoverUpload(event)">
+        <div id="mat-cover-preview-box" class="hidden" style="margin-top:6px;">
+          <img id="mat-cover-preview-img" src="" style="max-height:80px; border-radius:6px; border:1px solid var(--border-color);">
+        </div>
+      </div>
+
+      <!-- Password Protection (Optional) -->
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Enter Password (Optional - Leave blank for unprotected)</label>
+        <input type="password" id="mat-form-password" class="filter-control w-full" placeholder="Enter file protection password">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-material')">Cancel</button>
+        <button type="submit" id="btn-save-material" class="btn btn-primary">Save Material</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- 2. DOWNLOAD PASSWORD PROMPT MODAL -->
+<div id="modal-download-password" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">Protected File Download</div>
+    <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">
+      This file is password protected. Enter the password to download:
+    </div>
+
+    <form onsubmit="event.preventDefault(); submitVerifyDownloadPassword();">
+      <input type="hidden" id="dl-pass-mat-id" value="">
+      
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Enter File Password *</label>
+        <input type="password" id="dl-pass-input" class="filter-control w-full" placeholder="Enter password" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-download-password')">Cancel</button>
+        <button type="submit" id="btn-verify-download" class="btn btn-primary">Verify & Download</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- 3. ADD / EDIT SECTION MODAL -->
+<div id="modal-add-section" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header" id="sec-modal-title">Add Section</div>
+    <form onsubmit="event.preventDefault(); submitSaveSection();">
+      <input type="hidden" id="sec-form-id" value="">
+
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Section Name <span class="required">*</span></label>
+        <input type="text" id="sec-form-name" class="filter-control w-full" placeholder="e.g. Hand Written Notes, Question Papers" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-section')">Cancel</button>
+        <button type="submit" id="btn-save-sec" class="btn btn-primary">Save Section</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  let activeSmSectionId = null;
+  let activeSmSectionName = '';
+  let loadedSmFilesList = [];
+  let loadedSmSectionsList = [];
+  let currentFilesDisplayFormat = 'tiles';
+
+  function canAddMaterial() {
+    const user = window.AppState.currentUser;
+    if (!user) return false;
+    if (user.role === 'Admin') return true;
+    const perms = window.AppState.rolePermissions;
+    return perms && perms['add_material_dialog'] && perms['add_material_dialog'][user.role] === true;
+  }
+
+  function canAccessSectionPage() {
+    const user = window.AppState.currentUser;
+    if (!user) return false;
+    if (user.role === 'Admin') return true;
+    const perms = window.AppState.rolePermissions;
+    return perms && perms['study_material_section'] && perms['study_material_section'][user.role] === true;
+  }
+
+  function loadStudyMaterialPage() {
+    switchSmTab('library');
+
+    const secTabBtn = document.getElementById('sm-tab-section');
+    if (secTabBtn) {
+      if (canAccessSectionPage()) secTabBtn.classList.remove('hidden');
+      else secTabBtn.classList.add('hidden');
+    }
+
+    const addMatBtn = document.getElementById('btn-add-material-main');
+    if (addMatBtn) {
+      if (canAddMaterial()) addMatBtn.classList.remove('hidden');
+      else addMatBtn.classList.add('hidden');
+    }
+  }
+
+  function switchSmTab(tab) {
+    document.getElementById('sub-page-material-library').classList.add('hidden');
+    document.getElementById('sub-page-section').classList.add('hidden');
+
+    document.getElementById('sm-tab-library').classList.remove('active');
+    document.getElementById('sm-tab-section').classList.remove('active');
+
+    if (tab === 'library') {
+      document.getElementById('sub-page-material-library').classList.remove('hidden');
+      document.getElementById('sm-tab-library').classList.add('active');
+      closeSectionDetailView();
+    } else if (tab === 'section') {
+      if (!canAccessSectionPage()) {
+        showToast('You do not have permission to access the Section page!', 'error');
+        return;
+      }
+      document.getElementById('sub-page-section').classList.remove('hidden');
+      document.getElementById('sm-tab-section').classList.add('active');
+      loadSectionsTable();
+    }
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+  }
+
+
+  /* LEVEL 1: SECTIONS OVERVIEW TILES GRID */
+  async function loadSectionsOverview() {
+    const cls = document.getElementById('sm-filter-class').value;
+    const sub = document.getElementById('sm-filter-subject').value;
+    const chap = document.getElementById('sm-filter-chapter').value;
+    const q = document.getElementById('sm-filter-search').value;
+
+    const container = document.getElementById('sm-section-tiles-list');
+    container.innerHTML = `<div class="card" style="text-align:center; padding:30px;"><div class="spinner" style="border-top-color:var(--primary); width:20px; height:20px; margin:0 auto 8px auto;"></div>Loading sections...</div>`;
+
+    try {
+      const res = await ApiService.getSectionsOverview(cls, sub, chap, q);
+      if (res && res.status === 'success') {
+        renderSectionsOverviewTiles(res.sectionsOverview);
+      } else {
+        container.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Sections load failed!</div>`;
+      }
+    } catch(err) {
+      container.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Error: ${err.message}</div>`;
+    }
+  }
+
+  function renderSectionsOverviewTiles(list) {
+    const container = document.getElementById('sm-section-tiles-list');
+    if (!list || list.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted); grid-column:span 5;">No sections found. Please create a section in the Section tab first.</div>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach(s => {
+      html += `
+        <div class="sm-section-tile" onclick="openSectionDetailView('${s.id}', '${s.sectionName}')">
+          <div class="sm-tile-count-badge">${s.fileCount || 0}</div>
+          <div class="sm-tile-icon-box">
+            <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div class="sm-tile-name">${s.sectionName}</div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function applySmFilterSearch() {
+    if (activeSmSectionId) {
+      loadSectionFiles();
+    } else {
+      loadSectionsOverview();
+    }
+  }
+
+  async function onSmFilterClassSubjectChange() {
+    const cls = document.getElementById('sm-filter-class').value;
+    const sub = document.getElementById('sm-filter-subject').value;
+    const chapSelect = document.getElementById('sm-filter-chapter');
+
+    if (cls === 'All' || sub === 'All') {
+      chapSelect.innerHTML = `<option value="All">All Chapters</option>`;
+      applySmFilterSearch();
+      return;
+    }
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = `<option value="All">All Chapters</option>`;
+        res.chapters.forEach(c => {
+          html += `<option value="${c.id}">${c.chapterName}</option>`;
+        });
+        chapSelect.innerHTML = html;
+      } else {
+        chapSelect.innerHTML = `<option value="All">All Chapters</option>`;
+      }
+      applySmFilterSearch();
+    } catch(err) {
+      chapSelect.innerHTML = `<option value="All">All Chapters</option>`;
+      applySmFilterSearch();
+    }
+  }
+
+
+  /* LEVEL 2: SECTION FILES DETAIL VIEW */
+  function openSectionDetailView(sectionId, sectionName) {
+    activeSmSectionId = sectionId;
+    activeSmSectionName = sectionName;
+
+    document.getElementById('sm-active-section-title').innerText = sectionName;
+    document.getElementById('sm-active-view-label').innerText = 'Files in ' + sectionName;
+
+    document.getElementById('sm-sections-overview-container').classList.add('hidden');
+    document.getElementById('sm-files-detail-container').classList.remove('hidden');
+
+    switchFilesFormat('tiles');
+    loadSectionFiles();
+  }
+
+  function closeSectionDetailView() {
+    activeSmSectionId = null;
+    activeSmSectionName = '';
+
+    document.getElementById('sm-active-view-label').innerText = 'Sections Overview';
+    document.getElementById('sm-files-detail-container').classList.add('hidden');
+    document.getElementById('sm-sections-overview-container').classList.remove('hidden');
+
+    loadSectionsOverview();
+  }
+
+  function switchFilesFormat(fmt) {
+    currentFilesDisplayFormat = fmt;
+    const btnTiles = document.getElementById('btn-fmt-tiles');
+    const btnList = document.getElementById('btn-fmt-list');
+
+    if (fmt === 'tiles') {
+      btnTiles.className = 'btn btn-primary';
+      btnList.className = 'btn btn-secondary';
+      document.getElementById('sm-files-grid-view').classList.remove('hidden');
+      document.getElementById('sm-files-list-view').classList.add('hidden');
+    } else {
+      btnList.className = 'btn btn-primary';
+      btnTiles.className = 'btn btn-secondary';
+      document.getElementById('sm-files-list-view').classList.remove('hidden');
+      document.getElementById('sm-files-grid-view').classList.add('hidden');
+    }
+  }
+
+  async function loadSectionFiles() {
+    if (!activeSmSectionId) return;
+
+    const cls = document.getElementById('sm-filter-class').value;
+    const sub = document.getElementById('sm-filter-subject').value;
+    const chap = document.getElementById('sm-filter-chapter').value;
+    const q = document.getElementById('sm-filter-search').value;
+
+    const gridContainer = document.getElementById('sm-files-tiles-list');
+    const tableTbody = document.getElementById('sm-files-table-tbody');
+
+    gridContainer.innerHTML = `<div class="card" style="text-align:center; padding:30px;"><div class="spinner" style="border-top-color:var(--primary); width:20px; height:20px; margin:0 auto 8px auto;"></div>Loading files...</div>`;
+    tableTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Loading files...</td></tr>`;
+
+    try {
+      const res = await ApiService.getStudyMaterialsData(cls, sub, chap, activeSmSectionId, q);
+      if (res && res.status === 'success') {
+        loadedSmFilesList = res.materials || [];
+        renderSectionFilesTiles(res.materials);
+        renderSectionFilesTable(res.materials);
+      } else {
+        gridContainer.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Failed to load files.</div>`;
+      }
+    } catch(err) {
+      gridContainer.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Error: ${err.message}</div>`;
+    }
+  }
+
+  function renderSectionFilesTiles(materials) {
+    const container = document.getElementById('sm-files-tiles-list');
+    if (!materials || materials.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted); grid-column:span 4;">No files found in this section.</div>`;
+      return;
+    }
+
+    const hasAdminPerm = canAddMaterial();
+
+    let html = '';
+    materials.forEach(m => {
+      const fallbackImg = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=300';
+      const cover = m.coverImageUrl || fallbackImg;
+
+      html += `
+        <div class="sm-file-card">
+          <div class="sm-file-cover-wrapper">
+            <span class="sm-file-type-badge">${m.fileType || 'FILE'}</span>
+            ${m.hasPassword ? `<span class="sm-file-lock-badge" title="Password Protected"><svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9 2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>` : ''}
+            <img src="${cover}" class="sm-file-cover-img" alt="Cover" onerror="this.src='${fallbackImg}'">
+          </div>
+
+          <div class="sm-file-card-content">
+            <div class="sm-file-name" title="${m.fileName}">${m.fileName}</div>
+            <div class="sm-file-meta">Size: ${m.fileSize || '1.0 MB'} &bull; Class ${m.className} ${m.subject}</div>
+          </div>
+
+          <div class="sm-file-card-actions">
+            <button class="btn btn-primary" style="padding:4px 10px; font-size:11.5px;" onclick="triggerFileDownload('${m.id}', ${m.hasPassword})">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              <span>Download</span>
+            </button>
+
+            ${hasAdminPerm ? `
+              <div class="flex items-center gap-1">
+                ${m.hasPassword ? `<button class="btn-action-menu" onclick="triggerShowFilePassword('${m.id}')" title="Show Password"><svg class="icon" style="color:#2563eb;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>` : ''}
+                <button class="btn-action-menu" onclick="triggerEditMaterial('${m.id}')" title="Edit"><svg class="icon" style="color:#f59e0b;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+                <button class="btn-action-menu" onclick="triggerDeleteMaterial('${m.id}', '${m.fileName}')" title="Delete"><svg class="icon" style="color:#ef4444;" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderSectionFilesTable(materials) {
+    const tbody = document.getElementById('sm-files-table-tbody');
+    if (!materials || materials.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No files found in this section.</td></tr>`;
+      return;
+    }
+
+    const hasAdminPerm = canAddMaterial();
+
+    let html = '';
+    materials.forEach((m, idx) => {
+      html += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>
+            <div style="font-weight:700; color:var(--text-main);">${m.fileName}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Class ${m.className} &bull; ${m.subject}</div>
+          </td>
+          <td>${m.fileSize || '1.0 MB'}</td>
+          <td><span class="badge badge-student">${m.fileType || 'PDF'}</span></td>
+          <td style="text-align:center;">
+            <div class="flex items-center justify-between" style="justify-content:center; gap:6px;">
+              <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="triggerFileDownload('${m.id}', ${m.hasPassword})">Download</button>
+              ${hasAdminPerm ? `
+                ${m.hasPassword ? `<button class="btn-action-menu" onclick="triggerShowFilePassword('${m.id}')" title="Show Password"><svg class="icon" style="color:#2563eb;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>` : ''}
+                <button class="btn-action-menu" onclick="triggerEditMaterial('${m.id}')" title="Edit"><svg class="icon" style="color:#f59e0b;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+                <button class="btn-action-menu" onclick="triggerDeleteMaterial('${m.id}', '${m.fileName}')" title="Delete"><svg class="icon" style="color:#ef4444;" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  /* DOWNLOAD & PASSWORD VERIFICATION */
+  function triggerFileDownload(matId, hasPassword) {
+    if (hasPassword) {
+      document.getElementById('dl-pass-mat-id').value = matId;
+      document.getElementById('dl-pass-input').value = '';
+      document.getElementById('modal-download-password').classList.remove('hidden');
+    } else {
+      showToast('Starting download...', 'info');
+      ApiService.verifyMaterialPassword(matId, '').then(res => {
+        if (res && res.status === 'success' && res.fileUrl) {
+          window.open(res.fileUrl, '_blank');
+        } else {
+          showToast('Download failed!', 'error');
+        }
+      });
+    }
+  }
+
+  async function submitVerifyDownloadPassword() {
+    const matId = document.getElementById('dl-pass-mat-id').value;
+    const pwd = document.getElementById('dl-pass-input').value.trim();
+
+    const btn = document.getElementById('btn-verify-download');
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div> <span>Verifying...</span>`;
+
+    try {
+      const res = await ApiService.verifyMaterialPassword(matId, pwd);
+      btn.disabled = false;
+      btn.innerText = 'Verify & Download';
+
+      if (res && res.status === 'success' && res.fileUrl) {
+        showToast('Password correct! Starting download...', 'success');
+        closeModal('modal-download-password');
+        window.open(res.fileUrl, '_blank');
+      } else {
+        showToast(res.message || 'Incorrect Password!', 'error');
+      }
+    } catch(err) {
+      btn.disabled = false;
+      btn.innerText = 'Verify & Download';
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  async function triggerShowFilePassword(matId) {
+    try {
+      const res = await ApiService.getMaterialPassword(matId);
+      if (res && res.status === 'success') {
+        showToast('File Password: ' + res.password, 'info');
+      } else {
+        showToast('Failed to fetch password!', 'error');
+      }
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+
+  /* ADD / EDIT MATERIAL MODAL FUNCTIONS */
+  function openAddMaterialModal() {
+    if (!canAddMaterial()) {
+      showToast('You do not have permission to Add Material!', 'error');
+      return;
+    }
+
+    document.getElementById('mat-form-id').value = '';
+    document.getElementById('mat-form-file-url').value = '';
+    document.getElementById('mat-form-file-id').value = '';
+    document.getElementById('mat-form-file-size').value = '';
+    document.getElementById('mat-form-file-type').value = '';
+    document.getElementById('mat-form-cover-url').value = '';
+
+    document.getElementById('mat-file-input').value = '';
+    document.getElementById('mat-cover-input').value = '';
+    document.getElementById('mat-file-status-text').innerText = '';
+    document.getElementById('mat-cover-preview-box').classList.add('hidden');
+    document.getElementById('mat-form-name').value = '';
+    document.getElementById('mat-form-password').value = '';
+
+    document.getElementById('mat-form-class').selectedIndex = 0;
+    document.getElementById('mat-form-subject').selectedIndex = 0;
+    document.getElementById('mat-form-chapter').innerHTML = `<option value="">Select chapter (optional)</option>`;
+
+    loadSectionsDropdownForModal();
+
+    document.getElementById('mat-modal-title').innerText = 'Add New Material';
+    document.getElementById('modal-add-material').classList.remove('hidden');
+  }
+
+  async function loadSectionsDropdownForModal() {
+    const secSelect = document.getElementById('mat-form-section');
+    secSelect.innerHTML = `<option value="" disabled selected hidden>Loading sections...</option>`;
+
+    try {
+      const res = await ApiService.getSectionsData('');
+      if (res && res.status === 'success' && res.sections.length > 0) {
+        loadedSmSectionsList = res.sections;
+        let html = `<option value="" disabled selected hidden>Select section</option>`;
+        res.sections.forEach(s => {
+          html += `<option value="${s.id}" data-name="${s.sectionName}">${s.sectionName}</option>`;
+        });
+        secSelect.innerHTML = html;
+      } else {
+        secSelect.innerHTML = `<option value="" disabled selected hidden>Please create a Section first</option>`;
+      }
+    } catch(err) {
+      secSelect.innerHTML = `<option value="" disabled selected hidden>Error loading sections</option>`;
+    }
+  }
+
+  async function onMatModalClassSubjectChange() {
+    const cls = document.getElementById('mat-form-class').value;
+    const sub = document.getElementById('mat-form-subject').value;
+    const chapSelect = document.getElementById('mat-form-chapter');
+
+    if (!cls || !sub) return;
+
+    chapSelect.innerHTML = `<option value="">Loading chapters...</option>`;
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = `<option value="">Select chapter (optional)</option>`;
+        res.chapters.forEach(c => {
+          html += `<option value="${c.id}" data-name="${c.chapterName}">${c.chapterName}</option>`;
+        });
+        chapSelect.innerHTML = html;
+      } else {
+        chapSelect.innerHTML = `<option value="">Select chapter (optional)</option>`;
+      }
+    } catch(err) {
+      chapSelect.innerHTML = `<option value="">Select chapter (optional)</option>`;
+    }
+  }
+
+  async function handleMaterialFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('mat-form-name').value = file.name;
+    document.getElementById('mat-file-status-text').innerText = 'Uploading file... Please wait';
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      const base64Data = evt.target.result;
+
+      try {
+        const res = await ApiService.uploadImageToDrive(base64Data, file.name);
+        if (res && res.status === 'success') {
+          document.getElementById('mat-form-file-url').value = res.url;
+          document.getElementById('mat-form-file-id').value = res.fileId;
+          document.getElementById('mat-form-file-size').value = res.fileSize;
+          
+          const ext = file.name.split('.').pop().toUpperCase();
+          document.getElementById('mat-form-file-type').value = ext || 'FILE';
+
+          document.getElementById('mat-file-status-text').innerText = `File uploaded! (${res.fileSize})`;
+          showToast('File uploaded successfully!', 'success');
+        } else {
+          document.getElementById('mat-file-status-text').innerText = 'Upload failed!';
+          showToast('File upload failed!', 'error');
+        }
+      } catch(err) {
+        document.getElementById('mat-file-status-text').innerText = 'Upload error!';
+        showToast('Error: ' + err.message, 'error');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function handleMaterialCoverUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      const base64Data = evt.target.result;
+      showToast('Uploading cover image...', 'info');
+
+      try {
+        const res = await ApiService.uploadImageToDrive(base64Data, 'cover_' + file.name);
+        if (res && res.status === 'success') {
+          document.getElementById('mat-form-cover-url').value = res.url;
+          document.getElementById('mat-cover-preview-img').src = res.url;
+          document.getElementById('mat-cover-preview-box').classList.remove('hidden');
+          showToast('Cover image uploaded!', 'success');
+        } else {
+          showToast('Cover upload failed!', 'error');
+        }
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function submitSaveMaterial() {
+    const id = document.getElementById('mat-form-id').value;
+    const cls = document.getElementById('mat-form-class').value;
+    const sub = document.getElementById('mat-form-subject').value;
+    const chapSelect = document.getElementById('mat-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+
+    const secSelect = document.getElementById('mat-form-section');
+    const secId = secSelect.value;
+    const secName = secSelect.options[secSelect.selectedIndex] ? secSelect.options[secSelect.selectedIndex].getAttribute('data-name') : '';
+
+    const fileUrl = document.getElementById('mat-form-file-url').value;
+    const fileName = document.getElementById('mat-form-name').value.trim();
+
+    if (!cls || !sub || !secId || !fileName || !fileUrl) {
+      showToast('Please upload a File and fill Class, Subject, Section, and File Name!', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('btn-save-material');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+    const matData = {
+      id: id,
+      className: cls,
+      subject: sub,
+      chapterId: chapId,
+      chapterName: chapName,
+      fileUrl: fileUrl,
+      fileId: document.getElementById('mat-form-file-id').value,
+      fileName: fileName,
+      fileSize: document.getElementById('mat-form-file-size').value,
+      fileType: document.getElementById('mat-form-file-type').value,
+      coverImageUrl: document.getElementById('mat-form-cover-url').value,
+      password: document.getElementById('mat-form-password').value.trim(),
+      sectionId: secId,
+      sectionName: secName,
+      createdBy: window.AppState.currentUser ? window.AppState.currentUser.userId : ''
+    };
+
+    try {
+      const res = await ApiService.saveStudyMaterial(matData);
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Material</span>`;
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-material');
+        applySmFilterSearch();
+      } else {
+        showToast(res.message || 'Save failed!', 'error');
+      }
+    } catch(err) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Material</span>`;
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function triggerEditMaterial(id) {
+    const m = loadedSmFilesList.find(item => item.id === id);
+    if (!m) return;
+
+    openAddMaterialModal();
+    document.getElementById('mat-modal-title').innerText = 'Edit Material (' + m.fileName + ')';
+    document.getElementById('mat-form-id').value = m.id;
+    document.getElementById('mat-form-class').value = m.className;
+    document.getElementById('mat-form-subject').value = m.subject;
+    onMatModalClassSubjectChange();
+
+    document.getElementById('mat-form-file-url').value = m.fileUrl || '';
+    document.getElementById('mat-form-file-id').value = m.fileId || '';
+    document.getElementById('mat-form-file-size').value = m.fileSize || '';
+    document.getElementById('mat-form-file-type').value = m.fileType || '';
+    document.getElementById('mat-form-name').value = m.fileName || '';
+    document.getElementById('mat-file-status-text').innerText = 'File linked: ' + m.fileName;
+
+    if (m.coverImageUrl) {
+      document.getElementById('mat-form-cover-url').value = m.coverImageUrl;
+      document.getElementById('mat-cover-preview-img').src = m.coverImageUrl;
+      document.getElementById('mat-cover-preview-box').classList.remove('hidden');
+    }
+
+    setTimeout(() => {
+      document.getElementById('mat-form-section').value = m.sectionId;
+      document.getElementById('mat-form-chapter').value = m.chapterId || '';
+    }, 400);
+  }
+
+  function triggerDeleteMaterial(id, name) {
+    showConfirmModal('Delete Material', `Are you sure you want to delete file '${name}'?`, 'Delete', async function() {
+      try {
+        const res = await ApiService.deleteStudyMaterial(id);
+        showToast(res.message, 'success');
+        loadSectionFiles();
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+  }
+
+
+  /* ===================================================
+     SECTION PAGE FUNCTIONS
+     =================================================== */
+  async function loadSectionsTable() {
+    const q = document.getElementById('sec-search-input').value;
+    const tbody = document.getElementById('sections-table-tbody');
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">Loading sections...</td></tr>`;
+
+    try {
+      const res = await ApiService.getSectionsData(q);
+      if (res && res.status === 'success') {
+        renderSectionsTableRows(res.sections);
+      } else {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:20px;">Failed to load sections.</td></tr>`;
+      }
+    } catch(err) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:20px;">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  function renderSectionsTableRows(sections) {
+    const tbody = document.getElementById('sections-table-tbody');
+    if (!sections || sections.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">No sections found.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    sections.forEach((s, idx) => {
+      html += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${s.sectionName}</strong></td>
+          <td><span class="badge badge-student">${s.fileCount || 0} Files</span></td>
+          <td style="text-align:center; position:relative;">
+            <button class="btn-action-menu" onclick="toggleSecDropdown(event, '${s.id}')" title="Actions">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+
+            <div id="sec-dropdown-${s.id}" class="action-dropdown hidden">
+              <div class="action-item" onclick="editSectionTrigger('${s.id}', '${s.sectionName}')">
+                <svg class="icon" style="color:#f59e0b;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                <span>Edit</span>
+              </div>
+
+              <div class="action-item delete-item" onclick="deleteSectionTrigger('${s.id}', '${s.sectionName}')">
+                <svg class="icon" style="color:#ef4444;" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                <span>Delete</span>
+              </div>
+
+              <div class="action-item delete-item" onclick="deleteSectionFilesTrigger('${s.id}', '${s.sectionName}')">
+                <svg class="icon" style="color:#dc2626;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>Delete files from this section</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function toggleSecDropdown(e, secId) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('sec-dropdown-' + secId);
+    if (dropdown) dropdown.classList.toggle('hidden');
+  }
+
+  function openAddSectionModal() {
+    document.getElementById('sec-form-id').value = '';
+    document.getElementById('sec-form-name').value = '';
+    document.getElementById('sec-modal-title').innerText = 'Add Section';
+    document.getElementById('modal-add-section').classList.remove('hidden');
+  }
+
+  async function submitSaveSection() {
+    const id = document.getElementById('sec-form-id').value;
+    const name = document.getElementById('sec-form-name').value.trim();
+
+    if (!name) {
+      showToast('Section Name is required!', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('btn-save-sec');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+    try {
+      const res = await ApiService.saveSection({ id: id, sectionName: name });
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Section</span>`;
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-section');
+        loadSectionsTable();
+      } else {
+        showToast(res.message || 'Save failed!', 'error');
+      }
+    } catch(err) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Section</span>`;
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function editSectionTrigger(id, name) {
+    document.getElementById('sec-form-id').value = id;
+    document.getElementById('sec-form-name').value = name;
+    document.getElementById('sec-modal-title').innerText = 'Edit Section (' + name + ')';
+    document.getElementById('modal-add-section').classList.remove('hidden');
+  }
+
+  function deleteSectionTrigger(id, name) {
+    showConfirmModal('Delete Section', `Are you sure you want to delete section '${name}'?`, 'Delete', async function() {
+      try {
+        const res = await ApiService.deleteSection(id);
+        showToast(res.message, 'success');
+        loadSectionsTable();
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+  }
+
+  function deleteSectionFilesTrigger(id, name) {
+    showConfirmModal('Delete Section Files', `Are you sure you want to delete ALL files in section '${name}'?`, 'Delete Files', async function() {
+      try {
+        const res = await ApiService.deleteFilesBySection(id);
+        showToast(res.message, 'success');
+        loadSectionsTable();
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+  }
+</script>
