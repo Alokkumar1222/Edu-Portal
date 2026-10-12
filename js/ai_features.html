@@ -1,0 +1,233 @@
+<!-- ===================================================
+     EDU PORTAL - AI FEATURES MAIN CONTAINER (ai_features.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar - Clean White Background (VRTX Style) */
+  .ai-sub-header {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface); /* Pure White #ffffff */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px; /* Seamless gapless attachment */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ai-sub-header::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-sub-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    padding-right: 14px;
+    border-right: 1px solid var(--border-color);
+  }
+
+  .ai-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .ai-tab-btn:hover {
+    color: var(--primary);
+  }
+
+  .ai-tab-btn.active {
+    color: var(--primary) !important;
+    font-weight: 600;
+  }
+
+  .ai-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .ai-features-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .sub-page-view {
+    animation: fadeInView 0.2s ease forwards;
+    width: 100%;
+  }
+
+  @keyframes fadeInView {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="ai-features-wrapper">
+
+  <!-- 1. FIXED WHITE SUB-HEADER -->
+  <div class="ai-sub-header">
+    <div class="ai-sub-title">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
+      </svg>
+      <span>AI Features</span>
+    </div>
+
+    <!-- Navigation Sub-Tabs -->
+    <button id="tab-btn-ai-gen" class="ai-tab-btn active" onclick="switchAITab('gen')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span>AI Questions Generator</span>
+    </button>
+
+    <button id="tab-btn-ai-analysis" class="ai-tab-btn" onclick="switchAITab('analysis')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+      </svg>
+      <span>AI Exam Analysis</span>
+    </button>
+
+    <button id="tab-btn-ai-exam" class="ai-tab-btn" onclick="switchAITab('exam')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+      </svg>
+      <span>Create AI Exam</span>
+    </button>
+
+    <button id="tab-btn-ai-timetable" class="ai-tab-btn" onclick="switchAITab('timetable')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+      </svg>
+      <span>Generate Timetable</span>
+    </button>
+
+    <button id="tab-btn-ai-rank" class="ai-tab-btn" onclick="switchAITab('rank')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span>Predicted Marks and Rank</span>
+    </button>
+  </div>
+
+  <!-- 2. SUB-VIEWS CONTAINERS -->
+  <div id="sub-view-ai-gen" class="sub-page-view">
+    <!-- AI Questions Generator Component Mounts Here -->
+  </div>
+
+  <div id="sub-view-ai-analysis" class="sub-page-view hidden">
+    <div class="card" style="text-align: center; padding: 50px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:10px;" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+      </svg>
+      <h3 style="font-size: 16px; font-weight:700; color:var(--text-main);">AI Exam Analysis Page</h3>
+      <p style="color:var(--text-muted); font-size:12.5px; margin-top:4px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+  <div id="sub-view-ai-exam" class="sub-page-view hidden">
+    <div class="card" style="text-align: center; padding: 50px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:10px;" viewBox="0 0 24 24">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+      </svg>
+      <h3 style="font-size: 16px; font-weight:700; color:var(--text-main);">Create AI Exam Page</h3>
+      <p style="color:var(--text-muted); font-size:12.5px; margin-top:4px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+  <div id="sub-view-ai-timetable" class="sub-page-view hidden">
+    <div class="card" style="text-align: center; padding: 50px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:10px;" viewBox="0 0 24 24">
+        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+      </svg>
+      <h3 style="font-size: 16px; font-weight:700; color:var(--text-main);">Generate Timetable Page</h3>
+      <p style="color:var(--text-muted); font-size:12.5px; margin-top:4px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+  <div id="sub-view-ai-rank" class="sub-page-view hidden">
+    <div class="card" style="text-align: center; padding: 50px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:10px;" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <h3 style="font-size: 16px; font-weight:700; color:var(--text-main);">Predicted Marks and Rank Page</h3>
+      <p style="color:var(--text-muted); font-size:12.5px; margin-top:4px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchAITab(tabName) {
+    document.getElementById('sub-view-ai-gen').classList.add('hidden');
+    document.getElementById('sub-view-ai-analysis').classList.add('hidden');
+    document.getElementById('sub-view-ai-exam').classList.add('hidden');
+    document.getElementById('sub-view-ai-timetable').classList.add('hidden');
+    document.getElementById('sub-view-ai-rank').classList.add('hidden');
+
+    document.getElementById('tab-btn-ai-gen').classList.remove('active');
+    document.getElementById('tab-btn-ai-analysis').classList.remove('active');
+    document.getElementById('tab-btn-ai-exam').classList.remove('active');
+    document.getElementById('tab-btn-ai-timetable').classList.remove('active');
+    document.getElementById('tab-btn-ai-rank').classList.remove('active');
+
+    if (tabName === 'gen') {
+      document.getElementById('sub-view-ai-gen').classList.remove('hidden');
+      document.getElementById('tab-btn-ai-gen').classList.add('active');
+      if (typeof loadAIQuestionsGenerator === 'function') {
+        loadAIQuestionsGenerator();
+      }
+    } 
+    else if (tabName === 'analysis') {
+      document.getElementById('sub-view-ai-analysis').classList.remove('hidden');
+      document.getElementById('tab-btn-ai-analysis').classList.add('active');
+    } 
+    else if (tabName === 'exam') {
+      document.getElementById('sub-view-ai-exam').classList.remove('hidden');
+      document.getElementById('tab-btn-ai-exam').classList.add('active');
+    }
+    else if (tabName === 'timetable') {
+      document.getElementById('sub-view-ai-timetable').classList.remove('hidden');
+      document.getElementById('tab-btn-ai-timetable').classList.add('active');
+    }
+    else if (tabName === 'rank') {
+      document.getElementById('sub-view-ai-rank').classList.remove('hidden');
+      document.getElementById('tab-btn-ai-rank').classList.add('active');
+    }
+  }
+
+  function loadAIFeaturesPage() {
+    switchAITab('gen');
+  }
+</script>
