@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Edu Portal</title>
+  
+  <!-- 1. Google Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- 2. MathJax 3 Engine (LaTeX / Mathematical Formulas Rendering) -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <!-- 3. SheetJS (Excel Import & Demo File Download) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- 4. jsPDF & html2canvas (PDF Export Engine) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ===================================================
+       1. GLOBAL CSS VARIABLES & THEMING (VRTX PORTAL LIGHT)
+       =================================================== */
+    :root {
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-header: #ffffff;
+      --text-header: #0f172a;
+      --bg-sidebar: #ffffff;
+      --text-sidebar: #64748b;
+      --text-sidebar-active: #2563eb;
+      --bg-sidebar-active: #eff6ff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+      --modal-bg: rgba(15, 23, 42, 0.5);
+      --header-height: 60px;
+      --sub-header-height: 48px;
+      --sidebar-width: 250px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #151c2c;
+      --bg-header: #151c2c;
+      --text-header: #f8fafc;
+      --bg-sidebar: #090d16;
+      --text-sidebar: #64748b;
+      --text-sidebar-active: #f8fafc;
+      --bg-sidebar-active: #1e293b;
+      --border-color: #222d45;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --card-shadow: 0 4px 20px -2px rgba(0,0,0,0.3);
+      --primary-light: rgba(37, 99, 235, 0.15);
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --success-light: rgba(16, 185, 129, 0.15);
+      --warning-light: rgba(245, 158, 11, 0.15);
+    }
+
+    /* Reset & Base Styles - Mobile First & Anti-Overflow */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    /* Layout Wrapper */
+    #app-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      max-width: 100vw;
+      position: relative;
+    }
+
+    #main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      width: 100%;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.25s ease;
+    }
+
+    #content-area {
+      flex: 1;
+      padding: 18px 20px;
+      margin-top: var(--header-height);
+      width: 100%;
+      max-width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+      #main-wrapper {
+        margin-left: 0 !important;
+      }
+      #content-area {
+        padding: 12px 14px;
+      }
+    }
+
+    /* Utility Classes */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { display: flex; flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-4 { gap: 16px; }
+    .w-full { width: 100%; }
+    
+    /* Compact Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background-color: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: #ffffff;
+    }
+    .btn-danger:hover { opacity: 0.9; }
+
+    .btn-disabled, .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+      pointer-events: none;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      padding: 18px 20px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* Toasts & Modals */
+    #toast-container {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: calc(100vw - 32px);
+    }
+
+    .toast {
+      pointer-events: auto;
+      min-width: 260px;
+      max-width: 380px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      font-size: 13px;
+      animation: slideInRight 0.25s ease forwards;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error { border-left: 4px solid var(--danger); }
+    .toast-warning { border-left: 4px solid var(--warning); }
+    .toast-info { border-left: 4px solid var(--primary); }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--modal-bg);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      transform: scale(0.96);
+      animation: scaleUp 0.2s ease forwards;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes scaleUp {
+      to { transform: scale(1); }
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background-color: var(--bg-body);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .big-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    #fullscreen-exam-loader {
+      position: fixed;
+      inset: 0;
+      background-color: var(--modal-bg);
+      backdrop-filter: blur(6px);
+      z-index: 20000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .exam-loader-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Preloader -->
+  <div id="page-loader">
+    <div class="big-spinner"></div>
+    <div style="font-weight: 600; color: var(--text-main); font-size: 15px;">Edu Portal Loading...</div>
+  </div>
+
+  <!-- FULLSCREEN EXAM LAUNCH & SUBMIT LOADER -->
+  <div id="fullscreen-exam-loader" class="hidden">
+    <div class="exam-loader-spinner"></div>
+    <div style="font-weight:700; font-size:16px;" id="fullscreen-exam-loader-text">Loading Questions... Please wait</div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Main App Layout -->
+  <div id="app-container">
+
+    <!-- 1. LOGIN SCREEN CONTAINER -->
+    <div id="login-container" class="hidden" style="width: 100%;">
+      <!-- Login Component Mounted Dynamically -->
+    </div>
+
+    <!-- 2. MAIN DASHBOARD / PORTAL CONTAINER -->
+    <div id="portal-container" class="hidden" style="width: 100%; display: flex;">
+      
+      <!-- SIDEBAR CONTAINER -->
+      <div id="sidebar-mount-point"></div>
+
+      <div id="main-wrapper">
+        <!-- HEADER CONTAINER -->
+        <div id="header-mount-point"></div>
+
+        <!-- DYNAMIC CONTENT VIEW AREA -->
+        <main id="content-area">
+          <div id="view-dashboard" class="page-view hidden"></div>
+          <div id="view-user_management" class="page-view hidden"></div>
+          <div id="view-question_bank" class="page-view hidden"></div>
+          <div id="view-chapter" class="page-view hidden"></div>
+          <div id="view-exam" class="page-view hidden"></div>
+          <div id="view-manage_exam" class="page-view hidden"></div>
+          <div id="view-ai_features" class="page-view hidden"></div>
+          <div id="view-study_material" class="page-view hidden"></div>
+          <div id="view-start_exam" class="page-view hidden"></div>
+          <div id="view-result" class="page-view hidden"></div>
+          <div id="view-profile" class="page-view hidden"></div>
+          <div id="view-role_and_permission" class="page-view hidden"></div>
+          <div id="view-mistakes_bank" class="page-view hidden"></div>
+
+          <!-- Blank Placeholders -->
+          <div id="view-ask_problems" class="page-view hidden card">
+            <h2 style="font-size:18px;">Ask Problems</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">This page is currently blank and will be configured in future updates.</p>
+          </div>
+
+          <div id="view-questions_analysis" class="page-view hidden card">
+            <h2 style="font-size:18px;">Questions Analysis</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">This page is currently blank and will be configured in future updates.</p>
+          </div>
+
+          <div id="view-retest_exam" class="page-view hidden card">
+            <h2 style="font-size:18px;">Retest Exam</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">This page is currently blank and will be configured in future updates.</p>
+          </div>
+
+          <div id="view-laboratory" class="page-view hidden card">
+            <h2 style="font-size:18px;">Laboratory</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">This page is currently under development.</p>
+          </div>
+
+          <div id="view-setting" class="page-view hidden card">
+            <h2 style="font-size:18px;">Settings</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">This page is currently under development.</p>
+          </div>
+        </main>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Global Action / Confirmation Modal (Yes / No) -->
+  <div id="global-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div id="modal-title" class="modal-header">Confirm Action</div>
+      <div id="modal-body" class="modal-body">Are you sure you want to proceed?</div>
+      <div class="modal-actions">
+        <button id="modal-btn-cancel" class="btn btn-secondary">No, Cancel</button>
+        <button id="modal-btn-confirm" class="btn btn-danger">Yes, Proceed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Display Modal -->
+  <div id="password-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">User Password</div>
+      <div class="modal-body" style="text-align:center; padding: 12px 0;">
+        <span style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Password for <strong id="pass-modal-user">User</strong></span>
+        <div id="pass-modal-value" style="font-size:22px; font-weight:700; letter-spacing:2px; color:var(--primary);">----</div>
+      </div>
+      <div class="modal-actions">
+        <button onclick="closePasswordModal()" class="btn btn-primary" style="width:100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API SERVICE -->
+  <script src="js/api.js"></script>
+
+  <!-- GLOBAL APPLICATION ROUTER & CONTROLLER -->
+  <script>
+    window.AppState = {
+      currentUser: null,
+      sessionToken: localStorage.getItem('edu_session_token') || null,
+      activePage: 'dashboard',
+      theme: localStorage.getItem('edu_theme') || 'light',
+      rolePermissions: null
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyTheme(window.AppState.theme);
+      checkUserSession();
+    });
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      window.AppState.theme = theme;
+      localStorage.setItem('edu_theme', theme);
+      
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      }
+    }
+
+    function toggleTheme() {
+      const newTheme = window.AppState.theme === 'light' ? 'dark' : 'light';
+      applyTheme(newTheme);
+    }
+
+    async function checkUserSession() {
+      const token = window.AppState.sessionToken;
+      if (!token) {
+        showLoginScreen();
+        hidePreloader();
+        return;
+      }
+
+      try {
+        const response = await ApiService.checkSession(token);
+        if (response && response.status === 'success') {
+          window.AppState.currentUser = response.user;
+          window.AppState.rolePermissions = response.rolePermissions || null;
+          
+          showPortalScreen();
+          applyRolePermissionsUI();
+          navigateTo(window.AppState.activePage);
+        } else {
+          localStorage.removeItem('edu_session_token');
+          showLoginScreen();
+        }
+      } catch (e) {
+        localStorage.removeItem('edu_session_token');
+        showLoginScreen();
+      } finally {
+        hidePreloader();
+      }
+    }
+
+    function hidePreloader() {
+      const preloader = document.getElementById('page-loader');
+      if (preloader) preloader.classList.add('hidden');
+    }
+
+    function showFullscreenExamLoader(messageText) {
+      document.getElementById('fullscreen-exam-loader-text').innerText = messageText || 'Loading... Please wait';
+      document.getElementById('fullscreen-exam-loader').classList.remove('hidden');
+    }
+
+    function hideFullscreenExamLoader() {
+      document.getElementById('fullscreen-exam-loader').classList.add('hidden');
+    }
+
+    function showLoginScreen() {
+      document.getElementById('login-container').classList.remove('hidden');
+      document.getElementById('portal-container').classList.add('hidden');
+    }
+
+    function showPortalScreen() {
+      document.getElementById('login-container').classList.add('hidden');
+      document.getElementById('portal-container').classList.remove('hidden');
+      if (typeof updateHeaderAndSidebarUserInfo === 'function') {
+        updateHeaderAndSidebarUserInfo();
+      }
+    }
+
+    function applyRolePermissionsUI() {
+      const user = window.AppState.currentUser;
+      const perms = window.AppState.rolePermissions;
+      if (!user) return;
+
+      const userRole = user.role || 'Students';
+      if (userRole === 'Admin') return; // Admin has full access
+      if (!perms) return;
+
+      const pagesList = [
+        "dashboard", "user_management", "question_bank", "manage_exam",
+        "ai_features", "study_material", "laboratory", "start_exam",
+        "profile", "role_and_permission", "setting",
+        "mistakes_bank", "ask_problems", "questions_analysis", "retest_exam"
+      ];
+
+      pagesList.forEach(page => {
+        const isAllowed = (perms[page] && perms[page][userRole] === true);
+        
+        const navItem = document.getElementById('nav-' + page);
+        if (navItem && navItem.parentElement) {
+          if (isAllowed) navItem.parentElement.classList.remove('hidden');
+          else navItem.parentElement.classList.add('hidden');
+        }
+
+        const tileItem = document.getElementById('tile-' + page);
+        if (tileItem) {
+          if (isAllowed) tileItem.classList.remove('hidden');
+          else tileItem.classList.add('hidden');
+        }
+      });
+    }
+
+    function hasPagePermission(pageId) {
+      const user = window.AppState.currentUser;
+      if (!user) return false;
+      if (user.role === 'Admin') return true;
+
+      const perms = window.AppState.rolePermissions;
+      if (!perms || !perms[pageId]) return true;
+
+      return perms[pageId][user.role] === true;
+    }
+
+    function navigateTo(pageId) {
+      if (!hasPagePermission(pageId)) {
+        showToast('Aapke paas iss page ko access karne ki permission nahi hai!', 'error');
+        if (window.AppState.activePage !== pageId) return;
+        pageId = 'dashboard';
+      }
+
+      window.AppState.activePage = pageId;
+      
+      if (window.AppState.currentUser) {
+        ApiService.trackPageVisit(window.AppState.currentUser.userId, pageId);
+      }
+
+      const pages = document.querySelectorAll('.page-view');
+      pages.forEach(p => p.classList.add('hidden'));
+
+      const targetPage = document.getElementById('view-' + pageId);
+      if (targetPage) {
+        targetPage.classList.remove('hidden');
+      } else {
+        const defaultDashboard = document.getElementById('view-dashboard');
+        if (defaultDashboard) defaultDashboard.classList.remove('hidden');
+      }
+
+      if (typeof updateActiveSidebar === 'function') {
+        updateActiveSidebar(pageId);
+      }
+
+      // Page triggers
+      if (pageId === 'dashboard' && typeof loadDashboardData === 'function') loadDashboardData();
+      else if (pageId === 'user_management' && typeof loadUserManagement === 'function') loadUserManagement();
+      else if (pageId === 'question_bank' && typeof loadQuestionBank === 'function') loadQuestionBank();
+      else if (pageId === 'chapter' && typeof loadChapterPage === 'function') loadChapterPage();
+      else if (pageId === 'exam' && typeof loadExamPage === 'function') loadExamPage();
+      else if (pageId === 'manage_exam' && typeof loadManageExamPage === 'function') loadManageExamPage();
+      else if (pageId === 'ai_features' && typeof loadAIFeaturesPage === 'function') loadAIFeaturesPage();
+      else if (pageId === 'study_material' && typeof loadStudyMaterialPage === 'function') loadStudyMaterialPage();
+      else if (pageId === 'start_exam' && typeof loadStartExamPage === 'function') loadStartExamPage();
+      else if (pageId === 'profile' && typeof loadProfilePage === 'function') loadProfilePage();
+      else if (pageId === 'role_and_permission' && typeof loadRoleAndPermissionPage === 'function') loadRoleAndPermissionPage();
+      else if (pageId === 'mistakes_bank' && typeof loadMistakesPage === 'function') loadMistakesPage();
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+
+      if (typeof closeMobileSidebar === 'function') {
+        closeMobileSidebar();
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = `<svg class="icon" style="color:var(--success);" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+      } else if (type === 'error') {
+        iconSvg = `<svg class="icon" style="color:var(--danger);" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+      } else {
+        iconSvg = `<svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+      }
+
+      toast.innerHTML = `${iconSvg}<span style="font-weight:500;">${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.25s ease reverse forwards';
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
+    }
+
+    function showConfirmModal(title, message, confirmBtnText, onConfirm) {
+      const modal = document.getElementById('global-modal');
+      document.getElementById('modal-title').innerText = title || 'Confirm Action';
+      document.getElementById('modal-body').innerText = message || 'Are you sure?';
+      
+      const confirmBtn = document.getElementById('modal-btn-confirm');
+      confirmBtn.innerText = confirmBtnText || 'Yes, Proceed';
+
+      modal.classList.remove('hidden');
+
+      const handleConfirm = function() {
+        modal.classList.add('hidden');
+        cleanup();
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+
+      const handleCancel = function() {
+        modal.classList.add('hidden');
+        cleanup();
+      };
+
+      function cleanup() {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        document.getElementById('modal-btn-cancel').removeEventListener('click', handleCancel);
+      }
+
+      confirmBtn.addEventListener('click', handleConfirm);
+      document.getElementById('modal-btn-cancel').addEventListener('click', handleCancel);
+    }
+
+    function showPasswordModal(username, password) {
+      document.getElementById('pass-modal-user').innerText = username;
+      document.getElementById('pass-modal-value').innerText = password;
+      document.getElementById('password-modal').classList.remove('hidden');
+    }
+
+    function closePasswordModal() {
+      document.getElementById('password-modal').classList.add('hidden');
+    }
+
+    function handleLogout() {
+      showConfirmModal('Logout Confirmation', 'Kya aap sach me logout karna chahte hain?', 'Logout', async function() {
+        const token = window.AppState.sessionToken;
+        if (token) {
+          await ApiService.logoutUser(token);
+        }
+        localStorage.removeItem('edu_session_token');
+        window.AppState.currentUser = null;
+        window.AppState.sessionToken = null;
+        showToast('Successfully Logged Out', 'info');
+        showLoginScreen();
+      });
+    }
+  </script>
+</body>
+</html>
