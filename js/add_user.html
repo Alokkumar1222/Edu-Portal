@@ -1,0 +1,476 @@
+<!-- ===================================================
+     EDU PORTAL - ADD / EDIT USER FORM (add_user.html)
+     =================================================== -->
+
+<style>
+  .add-user-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .add-user-header {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .add-user-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .add-user-subtitle {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Form Layout Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .form-field {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .form-label .required {
+    color: var(--danger);
+  }
+
+  .form-input, .form-select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus, .form-select:focus {
+    border-color: var(--primary);
+    background-color: var(--bg-surface);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+
+  /* Drag & Drop Image Zone */
+  .image-drop-wrapper {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .dropzone-box {
+    flex: 1;
+    border: 2px dashed #93c5fd;
+    background-color: var(--primary-light);
+    border-radius: var(--radius-md);
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .dropzone-box:hover, .dropzone-box.dragover {
+    border-color: var(--primary);
+    background-color: rgba(37, 99, 235, 0.15);
+  }
+
+  .dropzone-icon {
+    width: 36px;
+    height: 36px;
+    color: var(--primary);
+    margin: 0 auto 6px auto;
+  }
+
+  .dropzone-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .dropzone-subtext {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .image-preview-box {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .preview-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 3px;
+    word-break: break-all;
+  }
+
+  .field-helper-info {
+    font-size: 11px;
+    color: var(--primary);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .form-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  @media (max-width: 868px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    .image-drop-wrapper {
+      flex-direction: column;
+    }
+    .image-preview-box {
+      width: 100%;
+      height: 110px;
+    }
+  }
+</style>
+
+<div class="add-user-card">
+  
+  <!-- Header -->
+  <div class="add-user-header">
+    <div class="add-user-title">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24">
+        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      <span id="form-title-text">Add User</span>
+    </div>
+    <div class="add-user-subtitle">Fill in the details to create a new user account or edit an existing profile.</div>
+  </div>
+
+  <form id="add-user-form" onsubmit="event.preventDefault(); submitUserForm();">
+    
+    <!-- Hidden User ID for Editing -->
+    <input type="hidden" id="form-user-id" value="">
+    <input type="hidden" id="form-existing-image-url" value="">
+
+    <div class="form-grid">
+      
+      <!-- LEFT COLUMN -->
+      <div class="column-left">
+        
+        <!-- 1. Username -->
+        <div class="form-field">
+          <label class="form-label" for="form-username">Username <span class="required">*</span></label>
+          <input type="text" id="form-username" class="form-input" placeholder="Enter username" required>
+        </div>
+
+        <!-- 2. Email ID -->
+        <div class="form-field">
+          <label class="form-label" for="form-email">Email ID <span class="required">*</span></label>
+          <input type="email" id="form-email" class="form-input" placeholder="Enter email id" required>
+        </div>
+
+        <!-- 3. Mobile Number -->
+        <div class="form-field">
+          <label class="form-label" for="form-mobile">Mobile Number <span class="required">*</span></label>
+          <input type="tel" id="form-mobile" class="form-input" placeholder="Enter mobile number" required>
+        </div>
+
+        <!-- 4. Date of Birth -->
+        <div class="form-field">
+          <label class="form-label" for="form-dob">Date of Birth <span class="required">*</span></label>
+          <input type="date" id="form-dob" class="form-input" required>
+        </div>
+
+        <!-- 5. Select Group -->
+        <div class="form-field">
+          <label class="form-label" for="form-group">Select Group <span class="required">*</span></label>
+          <select id="form-group" class="form-select" required>
+            <option value="" disabled selected hidden>Select group</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Science">Science</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="column-right">
+        
+        <!-- 6. Profile Image Upload Dropzone -->
+        <div class="form-field">
+          <label class="form-label">Profile Image <span class="required">*</span></label>
+          
+          <div class="image-drop-wrapper">
+            <div class="dropzone-box" id="image-dropzone" onclick="document.getElementById('form-image-input').click()">
+              <svg class="icon dropzone-icon" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+              </svg>
+              <div class="dropzone-text">Choose image from gallery or drag and drop</div>
+              <div class="dropzone-subtext">(JPG, PNG - Max 5MB)</div>
+            </div>
+
+            <!-- Preview Box -->
+            <div class="image-preview-box">
+              <img id="image-preview-element" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="preview-img" alt="Preview">
+              <span class="preview-label" id="preview-label-text">Image preview</span>
+            </div>
+          </div>
+
+          <input type="file" id="form-image-input" class="hidden" accept="image/*" onchange="handleImageSelect(event)">
+        </div>
+
+        <!-- 7. Password (4 digits) -->
+        <div class="form-field">
+          <label class="form-label" for="form-password">Password (4 digits)</label>
+          <input type="password" id="form-password" class="form-input" placeholder="Enter 4 digit password" maxlength="6">
+          <div class="field-helper-info">
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            <span>If left blank, password will be set to user's birth year (e.g. 2005).</span>
+          </div>
+        </div>
+
+        <!-- 8. Select Role -->
+        <div class="form-field">
+          <label class="form-label" for="form-role">Select Role <span class="required">*</span></label>
+          <select id="form-role" class="form-select" required>
+            <option value="" disabled selected hidden>Select role</option>
+            <option value="Students">Students</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Sub Admin">Sub Admin</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="form-actions-bar">
+      <button type="button" id="btn-reset-user" class="btn btn-secondary" onclick="resetAddUserForm()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        <span>Reset</span>
+      </button>
+
+      <button type="button" class="btn btn-secondary" onclick="switchUserTab('view')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <span>Cancel</span>
+      </button>
+
+      <button type="submit" id="btn-save-user" class="btn btn-primary">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+        <span>Save</span>
+      </button>
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+  let selectedBase64Image = null;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('image-dropzone');
+    if (dropzone) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.add('dragover'); }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }, false);
+      });
+
+      dropzone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          processFile(files[0]);
+        }
+      });
+    }
+  });
+
+  function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      processFile(file);
+    }
+  }
+
+  function processFile(file) {
+    if (!file.type.match('image.*')) {
+      showToast('Please select a valid image file!', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image size should be less than 5MB!', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      selectedBase64Image = e.target.result;
+      document.getElementById('image-preview-element').src = selectedBase64Image;
+      document.getElementById('preview-label-text').innerText = file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetAddUserForm() {
+    document.getElementById('add-user-form').reset();
+    document.getElementById('form-user-id').value = '';
+    document.getElementById('form-existing-image-url').value = '';
+    document.getElementById('form-title-text').innerText = 'Add User';
+    selectedBase64Image = null;
+    
+    document.getElementById('image-preview-element').src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    document.getElementById('preview-label-text').innerText = 'Image preview';
+    
+    document.getElementById('form-group').selectedIndex = 0;
+    document.getElementById('form-role').selectedIndex = 0;
+  }
+
+  function populateEditUserForm(user) {
+    resetAddUserForm();
+    document.getElementById('form-title-text').innerText = 'Edit User (' + user.userId + ')';
+    document.getElementById('form-user-id').value = user.userId;
+    document.getElementById('form-username').value = user.username || '';
+    document.getElementById('form-email').value = user.email || '';
+    document.getElementById('form-mobile').value = user.mobile || '';
+    document.getElementById('form-dob').value = user.dob || '';
+    document.getElementById('form-group').value = user.groupName || '';
+    document.getElementById('form-role').value = user.role || '';
+    document.getElementById('form-existing-image-url').value = user.imageUrl || '';
+
+    if (user.imageUrl) {
+      document.getElementById('image-preview-element').src = user.imageUrl;
+      document.getElementById('preview-label-text').innerText = 'Existing Image';
+    }
+
+    switchUserTab('add');
+  }
+
+  async function submitUserForm() {
+    const userId = document.getElementById('form-user-id').value;
+    const username = document.getElementById('form-username').value.trim();
+    const email = document.getElementById('form-email').value.trim();
+    const mobile = document.getElementById('form-mobile').value.trim();
+    const dob = document.getElementById('form-dob').value;
+    const groupName = document.getElementById('form-group').value;
+    const role = document.getElementById('form-role').value;
+    const password = document.getElementById('form-password').value.trim();
+    const existingImageUrl = document.getElementById('form-existing-image-url').value;
+
+    if (!username || !email || !mobile || !dob || !groupName || !role) {
+      showToast('Please fill in all required fields!', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('btn-save-user');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+    let finalImageUrl = existingImageUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    if (selectedBase64Image) {
+      try {
+        const uploadRes = await ApiService.uploadImageToDrive(selectedBase64Image, 'user_' + username + '.png');
+        if (uploadRes && uploadRes.status === 'success') {
+          finalImageUrl = uploadRes.url;
+        } else {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = `<span>Save</span>`;
+          showToast('Image upload failed: ' + (uploadRes.message || 'Error'), 'error');
+          return;
+        }
+      } catch (err) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<span>Save</span>`;
+        showToast('Image Upload Error: ' + err.message, 'error');
+        return;
+      }
+    }
+
+    const userData = {
+      userId: userId,
+      username: username,
+      email: email,
+      mobile: mobile,
+      dob: dob,
+      groupName: groupName,
+      role: role,
+      password: password,
+      imageUrl: finalImageUrl,
+      status: 'Active'
+    };
+
+    try {
+      const res = await ApiService.saveUser(userData);
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save</span>`;
+
+      if (res && res.status === 'success') {
+        showToast(res.message || 'User saved successfully!', 'success');
+        resetAddUserForm();
+        switchUserTab('view');
+      } else {
+        showToast(res.message || 'Save failed!', 'error');
+      }
+    } catch (err) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save</span>`;
+      showToast('Database Error: ' + err.message, 'error');
+    }
+  }
+</script>
