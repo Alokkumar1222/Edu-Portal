@@ -1,0 +1,1119 @@
+<!-- ===================================================
+     EDU PORTAL - MISTAKE BANK SYSTEM (mistakes.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar (VRTX White Style) */
+  .mis-sub-header {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mis-sub-header::-webkit-scrollbar { display: none; }
+
+  .mis-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .mis-tab-btn:hover { color: var(--primary); }
+  .mis-tab-btn.active { color: var(--primary) !important; font-weight: 600; }
+  .mis-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2.5px; background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Mistake Card */
+  .mis-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    word-break: break-word;
+  }
+
+  .mis-card.solved-card {
+    background-color: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+  }
+
+  .mis-card.overdue-card {
+    border-color: #fca5a5;
+  }
+
+  .mis-content-box {
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .mis-media-preview-img {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+  }
+
+  /* Camera Square Crop Modal Overlay */
+  .camera-overlay-box {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1;
+    background-color: #000000;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .camera-video-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .camera-square-frame {
+    position: absolute;
+    width: 75%;
+    height: 75%;
+    border: 3px solid #38bdf8;
+    box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* Multi Select Checkbox Group */
+  .type-chk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .type-chk-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  @media (max-width: 640px) {
+    .type-chk-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="mis-wrapper">
+
+  <!-- 1. FIXED SUB-HEADER TABS -->
+  <div class="mis-sub-header">
+    <div style="font-weight: 700; font-size: 14px; border-right: 1px solid var(--border-color); padding-right:14px; display:flex; align-items:center; gap:6px;">
+      <svg class="icon" style="color:var(--danger);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      <span>Mistake Bank</span>
+    </div>
+    
+    <button id="mis-tab-overview" class="mis-tab-btn active" onclick="switchMisTab('overview')">Overview</button>
+    <button id="mis-tab-bank" class="mis-tab-btn" onclick="switchMisTab('bank')">Mistake Bank</button>
+    <button id="mis-tab-upload-local" class="mis-tab-btn" onclick="switchMisTab('upload-local')">Upload All Saved Mistakes</button>
+    <button id="mis-tab-ai" class="mis-tab-btn" onclick="switchMisTab('ai')">AI Mistakes Analysis</button>
+  </div>
+
+
+  <!-- ===================================================
+       TAB 1: OVERVIEW DASHBOARD
+       =================================================== -->
+  <div id="sub-page-mis-overview" class="mis-sub-page">
+    
+    <!-- Date Filter Card -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap;">
+        <div class="flex items-center gap-2" style="flex:1; max-width:400px;">
+          <label class="filter-label">Select Date:</label>
+          <input type="date" id="mis-overview-date-picker" class="filter-control" style="flex:1;" onchange="loadOverviewStats()">
+          <button class="btn btn-secondary" onclick="resetOverviewDateFilter()">View All Dates</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="openAddMistakeModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Add Mistake</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Overall Statistics Cards Grid -->
+    <div class="summary-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:20px;">
+      <div class="summary-card card-total-users">
+        <div class="summary-card-top"><span class="summary-title">Total Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-total">0</div>
+      </div>
+
+      <div class="summary-card card-admin">
+        <div class="summary-card-top"><span class="summary-title">Physics Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-physics">0</div>
+      </div>
+
+      <div class="summary-card card-teacher">
+        <div class="summary-card-top"><span class="summary-title">Chemistry Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-chem">0</div>
+      </div>
+
+      <div class="summary-card card-subadmin">
+        <div class="summary-card-top"><span class="summary-title">Maths Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-maths">0</div>
+      </div>
+
+      <div class="summary-card card-students">
+        <div class="summary-card-top"><span class="summary-title">Hindi Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-hindi">0</div>
+      </div>
+
+      <div class="summary-card card-total-users">
+        <div class="summary-card-top"><span class="summary-title">English Mistakes</span></div>
+        <div class="summary-count" id="ov-stat-english">0</div>
+      </div>
+
+      <div class="summary-card" style="border-color:#fca5a5; background-color:#fef2f2;">
+        <div class="summary-card-top"><span class="summary-title" style="color:#dc2626;">Overdue Mistakes (>7 Days)</span></div>
+        <div class="summary-count" id="ov-stat-overdue" style="color:#dc2626;">0</div>
+      </div>
+    </div>
+
+    <!-- This Week's Chapters & High Priority Chapters Grids -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+      
+      <!-- This Week's Top 3 Chapters -->
+      <div class="card">
+        <div style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+          <span>This Week's Top Chapters</span>
+        </div>
+        <div id="ov-week-chapters-box" style="display:flex; flex-direction:column; gap:10px; font-size:12.5px;">Loading...</div>
+      </div>
+
+      <!-- High Priority Top 10 Chapters -->
+      <div class="card">
+        <div style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <svg class="icon" style="color:#dc2626;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          <span>High Priority Chapters</span>
+        </div>
+        <div id="ov-priority-chapters-box" style="display:flex; flex-direction:column; gap:10px; font-size:12.5px;">Loading...</div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       TAB 2: MISTAKE BANK (SHOW MISTAKES & CARDS)
+       =================================================== -->
+  <div id="sub-page-mis-bank" class="mis-sub-page hidden">
+    
+    <div class="card" style="margin-bottom:16px;">
+      <div class="flex items-center justify-between gap-2" style="margin-bottom:14px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="openAddMistakeModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Add Mistake</span>
+        </button>
+
+        <div style="font-size:12px; color:var(--text-muted);" id="mis-bank-count-label">Showing 0 mistakes</div>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="qb-filter-grid">
+        <div>
+          <label class="filter-label">Class</label>
+          <select id="mis-filter-class" class="filter-control w-full" onchange="onMisFilterClassSubjectChange()">
+            <option value="All">All Class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Subject</label>
+          <select id="mis-filter-subject" class="filter-control w-full" onchange="onMisFilterClassSubjectChange()">
+            <option value="All">All Subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Chapter</label>
+          <select id="mis-filter-chapter" class="filter-control w-full" onchange="loadMistakesBankList()">
+            <option value="All">All Chapters</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Status</label>
+          <select id="mis-filter-status" class="filter-control w-full" onchange="loadMistakesBankList()">
+            <option value="All">All Status</option>
+            <option value="Unsolved">Unsolved</option>
+            <option value="Try But Not Solved">Try But Not Solved</option>
+            <option value="Solved">Solved</option>
+            <option value="Overdue">Overdue (>7 Days)</option>
+            <option value="Test Paper Mistakes">Test Paper Mistakes</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Mistake Type</label>
+          <select id="mis-filter-type" class="filter-control w-full" onchange="loadMistakesBankList()">
+            <option value="All">All Types</option>
+            <option value="Calculation Mistakes">Calculation Mistakes</option>
+            <option value="Formula Not Known">Formula Not Known</option>
+            <option value="Concept Issue">Concept Issue</option>
+            <option value="Question Understanding Issue">Question Understanding Issue</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mistakes List Cards Container -->
+    <div id="mis-bank-cards-list"></div>
+
+  </div>
+
+
+  <!-- ===================================================
+       TAB 3: UPLOAD ALL SAVED MISTAKES (LOCALSTORAGE BATCH)
+       =================================================== -->
+  <div id="sub-page-mis-upload-local" class="mis-sub-page hidden">
+    <div class="card" style="text-align:center; padding:40px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--primary); margin-bottom:12px;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+      
+      <h3 style="font-size:18px; font-weight:700; color:var(--text-main);">Upload Locally Saved Mistakes</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:6px; margin-bottom:20px;">
+        Total locally saved mistakes in browser storage: <strong id="local-mistakes-count" style="color:var(--primary); font-size:18px;">0</strong>
+      </p>
+
+      <button class="btn btn-primary" id="btn-upload-all-local" onclick="uploadAllLocalMistakesToDatabase()" style="padding:10px 24px;">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+        <span>Upload All Saved Mistakes in Database</span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ===================================================
+       TAB 4: AI MISTAKES ANALYSIS (BLANK PLACEHOLDER)
+       =================================================== -->
+  <div id="sub-page-mis-ai" class="mis-sub-page hidden">
+    <div class="card" style="text-align:center; padding:60px 20px;">
+      <h3 style="font-size:18px; font-weight:700;">AI Mistakes Analysis</h3>
+      <p style="color:var(--text-muted); margin-top:6px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===================================================
+     MODALS & DIALOGS
+     =================================================== -->
+
+<!-- 1. ADD MISTAKE FORM MODAL -->
+<div id="modal-add-mistake" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:650px;">
+    <div class="modal-header">Add Mistake</div>
+    
+    <form onsubmit="event.preventDefault();">
+      <input type="hidden" id="mis-form-id" value="">
+
+      <!-- Step 1 & Step 2: Class & Subject -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div>
+          <label class="filter-label">Step 1 — Select Class *</label>
+          <select id="mis-form-class" class="filter-control w-full" onchange="onMisFormClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Step 2 — Select Subject *</label>
+          <select id="mis-form-subject" class="filter-control w-full" onchange="onMisFormClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 3 & Step 4: Chapter & Source Type -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div>
+          <label class="filter-label">Step 3 — Select Chapter *</label>
+          <select id="mis-form-chapter" class="filter-control w-full" required>
+            <option value="" disabled selected hidden>Select chapter</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Step 4 — Mistake Source Type *</label>
+          <select id="mis-form-source" class="filter-control w-full" required>
+            <option value="Practice Questions Solving Mistakes">Practice Questions Solving Mistakes</option>
+            <option value="Test Mistakes">Test Mistakes</option>
+            <option value="PYQ Solving Mistakes">PYQ Solving Mistakes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 5: Upload Mistake Content (At least 1 required) -->
+      <div class="filter-group" style="margin-bottom:14px; background:var(--bg-body); padding:12px; border-radius:8px;">
+        <label class="filter-label" style="font-weight:700;">Step 5 — Upload Mistake Content (Text / Gallery Image / Audio / Camera Photo) *</label>
+        
+        <!-- Textarea -->
+        <textarea id="mis-form-text" class="filter-control w-full" style="height:auto; margin-top:6px;" rows="2" placeholder="Add Text description of mistake..."></textarea>
+
+        <!-- Media Attachment Action Buttons -->
+        <div class="flex items-center gap-2" style="margin-top:10px; flex-wrap:wrap;">
+          <!-- Gallery Upload -->
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('mis-form-gallery-input').click()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gallery Image</span>
+          </button>
+          <input type="file" id="mis-form-gallery-input" class="hidden" accept="image/*" onchange="handleGalleryImageUpload(event)">
+
+          <!-- Take Photo Button -->
+          <button type="button" class="btn btn-secondary" onclick="openCameraModal()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm9-8h-3.17L16 5H8L6.17 7H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2z"/></svg>
+            <span>Take Photo</span>
+          </button>
+
+          <!-- Record Audio Button -->
+          <button type="button" class="btn btn-secondary" id="btn-mic-record-main" onclick="startAudioRecording('main')">
+            <svg class="icon" style="color:var(--danger);" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v5c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
+            <span id="txt-mic-record-main">Add Audio</span>
+          </button>
+        </div>
+
+        <!-- Previews -->
+        <input type="hidden" id="mis-form-gallery-base64" value="">
+        <input type="hidden" id="mis-form-camera-photo-base64" value="">
+        
+        <div id="mis-media-previews-box" class="flex items-center gap-2" style="margin-top:10px; flex-wrap:wrap;">
+          <div id="gallery-preview-box" class="hidden">
+            <img id="gallery-preview-img" src="" style="height:60px; border-radius:6px;">
+          </div>
+          <div id="camera-photo-preview-box" class="hidden">
+            <img id="camera-photo-preview-img" src="" style="height:60px; border-radius:6px; border:2px solid var(--primary);">
+          </div>
+          <audio id="audio-player-preview" controls class="hidden" style="height:36px; max-width:250px;"></audio>
+        </div>
+      </div>
+
+      <!-- Step 6: Mistake Type Multi-Select (At least 1 required) -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Step 6 — Mistake Type (Multi-select) *</label>
+        <div class="type-chk-grid">
+          <label class="type-chk-item"><input type="checkbox" class="mis-type-chk" value="Calculation Mistakes"> Calculation Mistakes</label>
+          <label class="type-chk-item"><input type="checkbox" class="mis-type-chk" value="Formula Not Known"> Formula Not Known</label>
+          <label class="type-chk-item"><input type="checkbox" class="mis-type-chk" value="Concept Issue"> Concept Issue</label>
+          <label class="type-chk-item"><input type="checkbox" class="mis-type-chk" value="Question Understanding Issue"> Question Understanding Issue</label>
+        </div>
+      </div>
+
+      <!-- Step 7: About Mistake Textarea -->
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Step 7 — About Mistake (Optional)</label>
+        <textarea id="mis-form-about" class="filter-control w-full" style="height:auto;" rows="2" placeholder="Write optional details..."></textarea>
+      </div>
+
+      <!-- Dual Save Actions -->
+      <div class="modal-actions" style="justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-mistake')">Cancel</button>
+
+        <div class="flex items-center gap-2">
+          <!-- Save in Localhost -->
+          <button type="button" class="btn btn-secondary" style="border-color:var(--primary); color:var(--primary);" onclick="submitSaveMistake('local')">
+            Save in Localhost
+          </button>
+          
+          <!-- Save in Database -->
+          <button type="button" id="btn-save-mis-db" class="btn btn-primary" onclick="submitSaveMistake('db')">
+            Save in Database
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+<!-- 2. CAMERA SQUARE CROPPER MODAL -->
+<div id="modal-camera-capture" class="modal-overlay hidden" style="z-index:10010;">
+  <div class="modal-box" style="max-width:440px; text-align:center;">
+    <div class="modal-header">Take Square Photo</div>
+    
+    <div class="camera-overlay-box" style="margin:0 auto 14px auto;">
+      <video id="camera-video-preview" class="camera-video-el" autoplay playsinline muted></video>
+      <div class="camera-square-frame"></div>
+    </div>
+
+    <div class="flex items-center justify-between gap-2">
+      <button class="btn btn-secondary" onclick="closeCameraModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="captureSquarePhoto()">Capture Photo</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. TRY BUT NOT SOLVED ATTEMPT MODAL -->
+<div id="modal-try-unsolved" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">Try But Not Solved Attempt</div>
+    
+    <form onsubmit="event.preventDefault(); submitTryUnsolvedAttempt();">
+      <input type="hidden" id="try-mat-id" value="">
+
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Add Attempt Notes / Text *</label>
+        <textarea id="try-form-text" class="filter-control w-full" rows="3" placeholder="Write what you tried..."></textarea>
+      </div>
+
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Record Audio Attempt (Optional)</label>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary" id="btn-mic-record-attempt" onclick="startAudioRecording('attempt')">Add Audio</button>
+          <audio id="att-audio-player-preview" controls class="hidden" style="height:32px; flex:1;"></audio>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-try-unsolved')">Cancel</button>
+        <button type="submit" id="btn-save-try-attempt" class="btn btn-primary">Save Attempt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- 4. FULLSCREEN IMAGE VIEWER MODAL -->
+<div id="modal-view-image-fullscreen" class="modal-overlay hidden" onclick="closeModal('modal-view-image-fullscreen')">
+  <div style="position:relative; max-width:90vw; max-height:90vh;">
+    <img id="fullscreen-img-viewer-el" src="" style="max-width:90vw; max-height:85vh; object-fit:contain; border-radius:8px;">
+    <button class="btn btn-secondary" style="position:absolute; top:-40px; right:0; color:#fff;" onclick="closeModal('modal-view-image-fullscreen')">Close</button>
+  </div>
+</div>
+
+
+<script>
+  let loadedMistakesList = [];
+  let cameraStream = null;
+  let audioStream = null;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recordedAudioBase64 = null;
+
+  function switchMisTab(tab) {
+    document.getElementById('sub-page-mis-overview').classList.add('hidden');
+    document.getElementById('sub-page-mis-bank').classList.add('hidden');
+    document.getElementById('sub-page-mis-upload-local').classList.add('hidden');
+    document.getElementById('sub-page-mis-ai').classList.add('hidden');
+
+    document.getElementById('mis-tab-overview').classList.remove('active');
+    document.getElementById('mis-tab-bank').classList.remove('active');
+    document.getElementById('mis-tab-upload-local').classList.remove('active');
+    document.getElementById('mis-tab-ai').classList.remove('active');
+
+    if (tab === 'overview') {
+      document.getElementById('sub-page-mis-overview').classList.remove('hidden');
+      document.getElementById('mis-tab-overview').classList.add('active');
+      loadOverviewStats();
+    } else if (tab === 'bank') {
+      document.getElementById('sub-page-mis-bank').classList.remove('hidden');
+      document.getElementById('mis-tab-bank').classList.add('active');
+      loadMistakesBankList();
+    } else if (tab === 'upload-local') {
+      document.getElementById('sub-page-mis-upload-local').classList.remove('hidden');
+      document.getElementById('mis-tab-upload-local').classList.add('active');
+      updateLocalMistakesCountUI();
+    } else if (tab === 'ai') {
+      document.getElementById('sub-page-mis-ai').classList.remove('hidden');
+      document.getElementById('mis-tab-ai').classList.add('active');
+    }
+  }
+
+  function loadMistakesPage() {
+    switchMisTab('overview');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  /* OVERVIEW TAB STATS */
+  async function loadOverviewStats() {
+    const user = window.AppState.currentUser;
+    if (!user) return;
+
+    const dateVal = document.getElementById('mis-overview-date-picker').value;
+    const res = await ApiService.getMistakeOverviewStats(user.userId, dateVal);
+
+    if (res && res.status === 'success') {
+      const s = res.stats;
+      document.getElementById('ov-stat-total').innerText = s.totalMistakes || 0;
+      document.getElementById('ov-stat-physics').innerText = s.subjectCounts ? s.subjectCounts.Physics || 0 : 0;
+      document.getElementById('ov-stat-chem').innerText = s.subjectCounts ? s.subjectCounts.Chemistry || 0 : 0;
+      document.getElementById('ov-stat-maths').innerText = s.subjectCounts ? s.subjectCounts.Maths || 0 : 0;
+      document.getElementById('ov-stat-hindi').innerText = s.subjectCounts ? s.subjectCounts.Hindi || 0 : 0;
+      document.getElementById('ov-stat-english').innerText = s.subjectCounts ? s.subjectCounts.English || 0 : 0;
+      document.getElementById('ov-stat-overdue').innerText = s.overdueCount || 0;
+
+      const weekBox = document.getElementById('ov-week-chapters-box');
+      let weekHtml = '';
+      Object.keys(s.thisWeekTopChapters || {}).forEach(sub => {
+        const chaps = s.thisWeekTopChapters[sub];
+        if (chaps.length > 0) {
+          weekHtml += `<div><strong>${sub}:</strong> ${chaps.map(c => `${c.chapterName} (${c.count})`).join(', ')}</div>`;
+        }
+      });
+      weekBox.innerHTML = weekHtml || '<div style="color:var(--text-muted);">Iss hafte koi mistake recorded nahi hai.</div>';
+
+      const prioBox = document.getElementById('ov-priority-chapters-box');
+      let prioHtml = '';
+      Object.keys(s.highPriorityChapters || {}).forEach(sub => {
+        const chaps = s.highPriorityChapters[sub];
+        if (chaps.length > 0) {
+          prioHtml += `<div><strong>${sub}:</strong> ${chaps.map(c => `${c.chapterName}`).join(', ')}</div>`;
+        }
+      });
+      prioBox.innerHTML = prioHtml || '<div style="color:var(--text-muted);">Koi priority chapter data nahi hai.</div>';
+    }
+  }
+
+  function resetOverviewDateFilter() {
+    document.getElementById('mis-overview-date-picker').value = '';
+    loadOverviewStats();
+  }
+
+
+  /* MISTAKE BANK CARDS & FILTERS */
+  async function loadMistakesBankList() {
+    const user = window.AppState.currentUser;
+    if (!user) return;
+
+    const params = {
+      userId: user.userId,
+      classFilter: document.getElementById('mis-filter-class').value,
+      subjectFilter: document.getElementById('mis-filter-subject').value,
+      chapterId: document.getElementById('mis-filter-chapter').value,
+      statusFilter: document.getElementById('mis-filter-status').value,
+      mistakeTypeFilter: document.getElementById('mis-filter-type').value,
+      sortOption: 'newest'
+    };
+
+    const container = document.getElementById('mis-bank-cards-list');
+    container.innerHTML = `<div class="card" style="text-align:center; padding:30px;"><div class="spinner" style="border-top-color:var(--primary); width:20px; height:20px; margin:0 auto 8px auto;"></div>Mistakes load ho rahi hain...</div>`;
+
+    const res = await ApiService.getMistakesData(params);
+    if (res && res.status === 'success') {
+      loadedMistakesList = res.mistakes || [];
+      document.getElementById('mis-bank-count-label').innerText = `Showing ${loadedMistakesList.length} mistakes`;
+      renderMistakesCards(loadedMistakesList);
+    } else {
+      container.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Load fail ho gaya.</div>`;
+    }
+  }
+
+  async function onMisFilterClassSubjectChange() {
+    const cls = document.getElementById('mis-filter-class').value;
+    const sub = document.getElementById('mis-filter-subject').value;
+    const chapSelect = document.getElementById('mis-filter-chapter');
+
+    if (cls === 'All' || sub === 'All') {
+      chapSelect.innerHTML = `<option value="All">All Chapters</option>`;
+      loadMistakesBankList();
+      return;
+    }
+
+    const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+    if (res && res.chapters && res.chapters.length > 0) {
+      let html = `<option value="All">All Chapters</option>`;
+      res.chapters.forEach(c => {
+        html += `<option value="${c.id}">${c.chapterName}</option>`;
+      });
+      chapSelect.innerHTML = html;
+    } else {
+      chapSelect.innerHTML = `<option value="All">All Chapters</option>`;
+    }
+    loadMistakesBankList();
+  }
+
+  function renderMistakesCards(list) {
+    const container = document.getElementById('mis-bank-cards-list');
+    if (!list || list.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">Koi mistake record nahi mila.</div>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach(m => {
+      const isSolved = (m.status === 'Solved');
+      const isOverdue = m.isOverdue;
+
+      let cardClass = 'mis-card';
+      if (isSolved) cardClass += ' solved-card';
+      else if (isOverdue) cardClass += ' overdue-card';
+
+      let statusBadge = `<span class="badge badge-student">Unsolved</span>`;
+      if (isSolved) statusBadge = `<span class="badge badge-active">Solved</span>`;
+      else if (isOverdue) statusBadge = `<span class="badge badge-admin">Overdue (${m.overdueDays} Days)</span>`;
+      else if (m.status === 'Try But Not Solved') statusBadge = `<span class="badge badge-subadmin">Try But Not Solved</span>`;
+
+      const typeBadges = (m.mistakeTypes || []).map(t => `<span class="badge badge-teacher">${t}</span>`).join(' ');
+
+      html += `
+        <div class="${cardClass}" id="mis-card-${m.mistakeId}">
+          <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap;">
+            <span class="qb-meta-badge">Class ${m.className} &bull; ${m.subject} &bull; ${m.chapterName || ''}</span>
+            <div class="flex items-center gap-2">${statusBadge} ${typeBadges}</div>
+          </div>
+
+          <div style="font-size:11.5px; color:var(--text-muted);">Source: <strong>${m.sourceType}</strong> &bull; Date: ${m.createdAt.split('T')[0]}</div>
+
+          <!-- Fixed Content Area -->
+          <div class="mis-content-box">
+            ${m.text ? `<div>${m.text}</div>` : ''}
+            ${m.imageUrl ? `<img src="${m.imageUrl}" class="mis-media-preview-img" onclick="openFullscreenImage('${m.imageUrl}')">` : ''}
+            ${m.photoUrl ? `<img src="${m.photoUrl}" class="mis-media-preview-img" onclick="openFullscreenImage('${m.photoUrl}')">` : ''}
+            ${m.audioUrl ? `<audio src="${m.audioUrl}" controls style="width:100%; height:32px; margin-top:6px;"></audio>` : ''}
+            ${m.aboutMistake ? `<div style="margin-top:6px; font-style:italic; color:var(--text-muted);">Note: ${m.aboutMistake}</div>` : ''}
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-between gap-2" style="margin-top:4px;">
+            <div></div>
+            ${!isSolved ? `
+              <div class="flex items-center gap-2">
+                <button class="btn btn-secondary" style="font-size:11.5px; padding:4px 10px;" onclick="openTryUnsolvedModal('${m.mistakeId}')">Try But Not Solved</button>
+                <button class="btn btn-primary" style="font-size:11.5px; padding:4px 10px; background-color:#10b981;" onclick="markMistakeSolved('${m.mistakeId}')">Solved</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function openFullscreenImage(url) {
+    document.getElementById('fullscreen-img-viewer-el').src = url;
+    document.getElementById('modal-view-image-fullscreen').classList.remove('hidden');
+  }
+
+  async function markMistakeSolved(mistakeId) {
+    showToast('Updating status to Solved...', 'info');
+    const res = await ApiService.updateMistakeStatus(mistakeId, 'Solved');
+    showToast(res.message, 'success');
+    loadMistakesBankList();
+  }
+
+
+  /* ADD MISTAKE MODAL & MEDIA PERMISSIONS */
+  function openAddMistakeModal() {
+    document.getElementById('mis-form-id').value = '';
+    document.getElementById('mis-form-class').selectedIndex = 0;
+    document.getElementById('mis-form-subject').selectedIndex = 0;
+    document.getElementById('mis-form-chapter').innerHTML = `<option value="" disabled selected hidden>Select chapter</option>`;
+    
+    document.getElementById('mis-form-text').value = '';
+    document.getElementById('mis-form-about').value = '';
+    
+    document.getElementById('mis-form-gallery-base64').value = '';
+    document.getElementById('mis-form-camera-photo-base64').value = '';
+    
+    document.getElementById('gallery-preview-box').classList.add('hidden');
+    document.getElementById('camera-photo-preview-box').classList.add('hidden');
+    document.getElementById('audio-player-preview').classList.add('hidden');
+
+    const chks = document.querySelectorAll('.mis-type-chk');
+    chks.forEach(c => c.checked = false);
+
+    document.getElementById('modal-add-mistake').classList.remove('hidden');
+  }
+
+  async function onMisFormClassSubjectChange() {
+    const cls = document.getElementById('mis-form-class').value;
+    const sub = document.getElementById('mis-form-subject').value;
+    const chapSelect = document.getElementById('mis-form-chapter');
+
+    if (!cls || !sub) return;
+    chapSelect.innerHTML = `<option value="" disabled selected hidden>Loading chapters...</option>`;
+
+    const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+    if (res && res.chapters && res.chapters.length > 0) {
+      let html = `<option value="" disabled selected hidden>Select chapter</option>`;
+      res.chapters.forEach(c => {
+        html += `<option value="${c.id}" data-name="${c.chapterName}">${c.chapterName}</option>`;
+      });
+      chapSelect.innerHTML = html;
+    } else {
+      chapSelect.innerHTML = `<option value="" disabled selected hidden>Koi chapter nahi mila</option>`;
+    }
+  }
+
+  /* CAMERA SQUARE PHOTO CAPTURE */
+  function openCameraModal() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('Aapka browser camera support nahi karta!', 'error');
+      return;
+    }
+
+    const video = document.getElementById('camera-video-preview');
+    document.getElementById('modal-camera-capture').classList.remove('hidden');
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        cameraStream = stream;
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(err => {
+        closeCameraModal();
+        showToast('Camera Permission Denied: ' + err.message, 'error');
+      });
+  }
+
+  function stopCameraTracks() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+  }
+
+  function closeCameraModal() {
+    stopCameraTracks();
+    document.getElementById('modal-camera-capture').classList.add('hidden');
+  }
+
+  function captureSquarePhoto() {
+    const video = document.getElementById('camera-video-preview');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const minDim = Math.min(video.videoWidth, video.videoHeight);
+    const startX = (video.videoWidth - minDim) / 2;
+    const startY = (video.videoHeight - minDim) / 2;
+
+    canvas.width = 500;
+    canvas.height = 500;
+
+    ctx.drawImage(video, startX, startY, minDim, minDim, 0, 0, 500, 500);
+    const croppedBase64 = canvas.toDataURL('image/png');
+
+    stopCameraTracks();
+    closeCameraModal();
+
+    document.getElementById('mis-form-camera-photo-base64').value = croppedBase64;
+    document.getElementById('camera-photo-preview-img').src = croppedBase64;
+    document.getElementById('camera-photo-preview-box').classList.remove('hidden');
+    showToast('Square photo captured!', 'success');
+  }
+
+  /* MICROPHONE AUDIO RECORDING */
+  function startAudioRecording(targetType) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('Aapka browser microphone support nahi karta!', 'error');
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        audioStream = stream;
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            recordedAudioBase64 = reader.result;
+            const player = document.getElementById(targetType === 'main' ? 'audio-player-preview' : 'att-audio-player-preview');
+            if (player) {
+              player.src = URL.createObjectURL(blob);
+              player.classList.remove('hidden');
+            }
+          };
+          reader.readAsDataURL(blob);
+          stopAudioTracks();
+        };
+
+        mediaRecorder.start();
+        showToast('Microphone recording started...', 'info');
+
+        const btnTxt = document.getElementById('txt-mic-record-main');
+        if (btnTxt) btnTxt.innerText = 'Recording... Click to Stop';
+
+        document.getElementById('btn-mic-record-main').onclick = function() {
+          stopAudioRecording();
+          btnTxt.innerText = 'Add Audio';
+          document.getElementById('btn-mic-record-main').onclick = function() { startAudioRecording('main'); };
+        };
+      })
+      .catch(err => {
+        showToast('Microphone Permission Denied: ' + err.message, 'error');
+      });
+  }
+
+  function stopAudioRecording() {
+    if (mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
+      mediaRecorder.stop();
+      showToast('Recording stopped', 'success');
+    }
+  }
+
+  function stopAudioTracks() {
+    if (audioStream) {
+      audioStream.getTracks().forEach(track => track.stop());
+      audioStream = null;
+    }
+  }
+
+  function handleGalleryImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.getElementById('mis-form-gallery-base64').value = evt.target.result;
+      document.getElementById('gallery-preview-img').src = evt.target.result;
+      document.getElementById('gallery-preview-box').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* SAVE MISTAKE FORM (LOCAL VS DATABASE) */
+  async function submitSaveMistake(saveMode) {
+    const cls = document.getElementById('mis-form-class').value;
+    const sub = document.getElementById('mis-form-subject').value;
+    const chapSelect = document.getElementById('mis-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+    const source = document.getElementById('mis-form-source').value;
+
+    const text = document.getElementById('mis-form-text').value.trim();
+    const galleryBase64 = document.getElementById('mis-form-gallery-base64').value;
+    const cameraBase64 = document.getElementById('mis-form-camera-photo-base64').value;
+
+    const typeChks = document.querySelectorAll('.mis-type-chk:checked');
+    const mistakeTypes = Array.from(typeChks).map(c => c.value);
+    const about = document.getElementById('mis-form-about').value.trim();
+
+    if (!cls || !sub || !chapId) {
+      showToast('Kripya Class, Subject aur Chapter select karein!', 'error');
+      return;
+    }
+
+    if (!text && !galleryBase64 && !cameraBase64 && !recordedAudioBase64) {
+      showToast('Text, Gallery Image, Audio, ya Photo me se kam se kam EK Content zaroori hai!', 'error');
+      return;
+    }
+
+    if (mistakeTypes.length === 0) {
+      showToast('Kripya kam se kam EK Mistake Type select karein!', 'error');
+      return;
+    }
+
+    const user = window.AppState.currentUser;
+    const localRecord = {
+      localId: "MIS_LOCAL_" + Date.now(),
+      userId: user ? user.userId : 'guest',
+      className: cls,
+      subject: sub,
+      chapterId: chapId,
+      chapterName: chapName,
+      sourceType: source,
+      text: text,
+      galleryBase64: galleryBase64,
+      cameraBase64: cameraBase64,
+      audioBase64: recordedAudioBase64,
+      mistakeTypes: mistakeTypes,
+      aboutMistake: about,
+      status: 'Unsolved',
+      createdAt: new Date().toISOString()
+    };
+
+    if (saveMode === 'local') {
+      let localList = JSON.parse(localStorage.getItem('mistakeBankLocal') || '[]');
+      localList.push(localRecord);
+      localStorage.setItem('mistakeBankLocal', JSON.stringify(localList));
+
+      showToast('Mistake Localhost me save ho gayi!', 'success');
+      closeModal('modal-add-mistake');
+      updateLocalMistakesCountUI();
+    } else {
+      const saveBtn = document.getElementById('btn-save-mis-db');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+      const dbPayload = {
+        userId: localRecord.userId,
+        className: localRecord.className,
+        subject: localRecord.subject,
+        chapterId: localRecord.chapterId,
+        chapterName: localRecord.chapterName,
+        sourceType: localRecord.sourceType,
+        text: localRecord.text,
+        imageUrl: localRecord.galleryBase64,
+        photoUrl: localRecord.cameraBase64,
+        audioUrl: localRecord.audioBase64,
+        mistakeTypes: localRecord.mistakeTypes,
+        aboutMistake: localRecord.aboutMistake,
+        status: 'Unsolved'
+      };
+
+      const res = await ApiService.saveMistakeRecord(dbPayload);
+      saveBtn.disabled = false;
+      saveBtn.innerText = 'Save in Database';
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-mistake');
+        loadMistakesBankList();
+      } else {
+        showToast(res.message || 'Database save fail!', 'error');
+      }
+    }
+  }
+
+  /* UPLOAD ALL LOCAL MISTAKES TAB */
+  function updateLocalMistakesCountUI() {
+    const localList = JSON.parse(localStorage.getItem('mistakeBankLocal') || '[]');
+    document.getElementById('local-mistakes-count').innerText = localList.length;
+  }
+
+  async function uploadAllLocalMistakesToDatabase() {
+    const localList = JSON.parse(localStorage.getItem('mistakeBankLocal') || '[]');
+    const user = window.AppState.currentUser;
+
+    if (!user) {
+      showToast('Kripya login karein!', 'error');
+      return;
+    }
+
+    if (localList.length === 0) {
+      showToast('Upload karne ke liye koi local mistake nahi hai!', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('btn-upload-all-local');
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div> <span>Uploading Local Mistakes...</span>`;
+
+    const res = await ApiService.batchSaveMistakes({ userId: user.userId, mistakesArray: localList });
+    btn.disabled = false;
+    btn.innerHTML = `<span>Upload All Saved Mistakes in Database</span>`;
+
+    if (res && res.status === 'success') {
+      const savedIds = res.savedIds || [];
+      const remaining = localList.filter(m => !savedIds.includes(m.localId));
+      localStorage.setItem('mistakeBankLocal', JSON.stringify(remaining));
+
+      updateLocalMistakesCountUI();
+      showToast(res.message, 'success');
+    } else {
+      showToast('Upload fail ho gaya!', 'error');
+    }
+  }
+
+  /* TRY BUT NOT SOLVED MODAL */
+  function openTryUnsolvedModal(mistakeId) {
+    document.getElementById('try-mat-id').value = mistakeId;
+    document.getElementById('try-form-text').value = '';
+    document.getElementById('modal-try-unsolved').classList.remove('hidden');
+  }
+
+  async function submitTryUnsolvedAttempt() {
+    const mistakeId = document.getElementById('try-mat-id').value;
+    const text = document.getElementById('try-form-text').value.trim();
+
+    if (!text && !recordedAudioBase64) {
+      showToast('Text ya Audio me se kam se kam EK detail bharein!', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-save-try-attempt');
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+    const payload = {
+      text: text,
+      audioUrl: recordedAudioBase64 || ''
+    };
+
+    const res = await ApiService.addMistakeAttempt(mistakeId, payload);
+    btn.disabled = false;
+    btn.innerText = 'Save Attempt';
+
+    if (res && res.status === 'success') {
+      showToast(res.message, 'success');
+      closeModal('modal-try-unsolved');
+      loadMistakesBankList();
+    } else {
+      showToast(res.message || 'Attempt save fail!', 'error');
+    }
+  }
+</script>
