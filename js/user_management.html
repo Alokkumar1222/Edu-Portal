@@ -1,0 +1,194 @@
+<!-- ===================================================
+     EDU PORTAL - USER MANAGEMENT MAIN CONTAINER (user_management.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar - Clean White Background (VRTX Style) */
+  .sub-header-bar {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface); /* Pure White #ffffff */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px; /* Seamless gapless attachment */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sub-header-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    padding-right: 14px;
+    border-right: 1px solid var(--border-color);
+  }
+
+  .sub-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .sub-tab-btn:hover {
+    color: var(--primary);
+  }
+
+  .sub-tab-btn.active {
+    color: var(--primary) !important;
+    font-weight: 600;
+  }
+
+  .sub-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .user-mgmt-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .sub-page-view {
+    animation: fadeInView 0.2s ease forwards;
+    width: 100%;
+  }
+
+  @keyframes fadeInView {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="user-mgmt-wrapper">
+
+  <!-- 1. FIXED WHITE SUB-HEADER WITH BLUE UNDERLINE TABS -->
+  <div class="sub-header-bar">
+    <div class="sub-header-title">
+      <svg class="icon" style="color: var(--primary);" viewBox="0 0 24 24">
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+      </svg>
+      <span>User Management</span>
+    </div>
+
+    <!-- Navigation Sub-Tabs -->
+    <button id="tab-btn-view" class="sub-tab-btn active" onclick="switchUserTab('view')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+      </svg>
+      <span>View User</span>
+    </button>
+
+    <button id="tab-btn-add" class="sub-tab-btn" onclick="switchUserTab('add', true)">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      <span>Add User</span>
+    </button>
+
+    <button id="tab-btn-details" class="sub-tab-btn" onclick="switchUserTab('details')">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+      </svg>
+      <span>User Details</span>
+    </button>
+
+  </div>
+
+  <!-- 2. SUB-PAGES CONTAINERS -->
+  <div id="sub-view-view-user" class="sub-page-view">
+    <!-- View User Component Mounts Here -->
+  </div>
+
+  <div id="sub-view-add-user" class="sub-page-view hidden">
+    <!-- Add User Component Mounts Here -->
+  </div>
+
+  <div id="sub-view-user-details" class="sub-page-view hidden">
+    <div class="card" style="text-align: center; padding: 50px 20px;">
+      <svg class="icon" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:10px;" viewBox="0 0 24 24">
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+      </svg>
+      <h3 style="font-size: 16px; font-weight:700; color:var(--text-main);">User Details Page</h3>
+      <p style="color:var(--text-muted); font-size:12.5px; margin-top:4px;">This page is currently blank and will be configured in future updates.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchUserTab(tabName, isFreshAdd = false) {
+    const viewUserDiv = document.getElementById('sub-view-view-user');
+    const addUserDiv = document.getElementById('sub-view-add-user');
+    const userDetailsDiv = document.getElementById('sub-view-user-details');
+
+    if (viewUserDiv) viewUserDiv.classList.add('hidden');
+    if (addUserDiv) addUserDiv.classList.add('hidden');
+    if (userDetailsDiv) userDetailsDiv.classList.add('hidden');
+
+    const btnView = document.getElementById('tab-btn-view');
+    const btnAdd = document.getElementById('tab-btn-add');
+    const btnDetails = document.getElementById('tab-btn-details');
+
+    if (btnView) btnView.classList.remove('active');
+    if (btnAdd) btnAdd.classList.remove('active');
+    if (btnDetails) btnDetails.classList.remove('active');
+
+    if (tabName === 'view') {
+      if (viewUserDiv) viewUserDiv.classList.remove('hidden');
+      if (btnView) btnView.classList.add('active');
+      if (typeof loadUsersList === 'function') {
+        loadUsersList(1);
+      }
+    } 
+    else if (tabName === 'add') {
+      if (addUserDiv) addUserDiv.classList.remove('hidden');
+      if (btnAdd) btnAdd.classList.add('active');
+
+      if (isFreshAdd && typeof resetAddUserForm === 'function') {
+        resetAddUserForm();
+      }
+    } 
+    else if (tabName === 'details') {
+      if (userDetailsDiv) userDetailsDiv.classList.remove('hidden');
+      if (btnDetails) btnDetails.classList.add('active');
+    }
+  }
+
+  function loadUserManagement() {
+    switchUserTab('view');
+  }
+</script>
