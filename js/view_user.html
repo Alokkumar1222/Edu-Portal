@@ -1,0 +1,719 @@
+<!-- ===================================================
+     EDU PORTAL - VIEW USER & SUMMARY (view_user.html)
+     =================================================== -->
+
+<style>
+  .view-user-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* 1. Summary Cards Grid - VRTX Style */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  .summary-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .summary-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .summary-icon-box {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .summary-count {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* VRTX Summary Card Color Variants */
+  .card-total-users { border-color: #bfdbfe; }
+  .card-total-users .summary-count { color: #1d4ed8; }
+  .card-total-users .summary-icon-box { background-color: #eff6ff; color: #1d4ed8; }
+
+  .card-admin { border-color: #bbf7d0; }
+  .card-admin .summary-count { color: #15803d; }
+  .card-admin .summary-icon-box { background-color: #f0fdf4; color: #15803d; }
+
+  .card-subadmin { border-color: #fed7aa; }
+  .card-subadmin .summary-count { color: #c2410c; }
+  .card-subadmin .summary-icon-box { background-color: #fff7ed; color: #c2410c; }
+
+  .card-teacher { border-color: #e9d5ff; }
+  .card-teacher .summary-count { color: #7e22ce; }
+  .card-teacher .summary-icon-box { background-color: #faf5ff; color: #7e22ce; }
+
+  .card-students { border-color: #fef08a; }
+  .card-students .summary-count { color: #a16207; }
+  .card-students .summary-icon-box { background-color: #fefce8; color: #a16207; }
+
+  /* 2. Filters Card */
+  .filter-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-row-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .filter-row-2 {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .filter-control {
+    height: 36px;
+    padding: 6px 10px;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: 12.5px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .filter-control:focus {
+    border-color: var(--primary);
+    background-color: var(--bg-surface);
+  }
+
+  /* 3. Table Card */
+  .table-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .data-table th {
+    padding: 10px 12px;
+    background-color: var(--bg-body);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    vertical-align: middle;
+  }
+
+  .data-table tr.user-row-inactive {
+    background-color: rgba(239, 68, 68, 0.05) !important;
+  }
+
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-cell-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+  }
+
+  .user-cell-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-cell-name {
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .user-cell-id {
+    font-size: 10.5px;
+    color: var(--text-muted);
+  }
+
+  /* VRTX Soft Color Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-admin { background-color: #fee2e2; color: #dc2626; }
+  .badge-subadmin { background-color: #ffedd5; color: #c2410c; }
+  .badge-teacher { background-color: #e0e7ff; color: #4338ca; }
+  .badge-student { background-color: #dcfce7; color: #15803d; }
+
+  .badge-active { background-color: #dcfce7; color: #15803d; }
+  .badge-inactive { background-color: #fee2e2; color: #dc2626; }
+
+  /* Triple Dot Menu */
+  .btn-action-menu {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px 6px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .btn-action-menu:hover {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+  }
+
+  .action-dropdown {
+    position: absolute;
+    right: 25px;
+    margin-top: -5px;
+    width: 150px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 4px;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-main);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .action-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .action-item.delete-item:hover {
+    background-color: var(--danger-light);
+    color: var(--danger);
+  }
+
+  /* Pagination Bar */
+  .pagination-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .pagination-btns {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .page-btn {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .page-btn.active {
+    background-color: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1100px) {
+    .summary-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .filter-row-1 { grid-template-columns: 1fr; }
+    .filter-row-2 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="view-user-container">
+  
+  <!-- 1. SUMMARY CARDS -->
+  <div class="summary-grid">
+    
+    <!-- Total Users -->
+    <div class="summary-card card-total-users">
+      <div class="summary-card-top">
+        <span class="summary-title">Total Users</span>
+        <div class="summary-icon-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        </div>
+      </div>
+      <div class="summary-count" id="count-total-users">0</div>
+    </div>
+
+    <!-- Total Admin -->
+    <div class="summary-card card-admin">
+      <div class="summary-card-top">
+        <span class="summary-title">Total Admin</span>
+        <div class="summary-icon-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        </div>
+      </div>
+      <div class="summary-count" id="count-total-admin">0</div>
+    </div>
+
+    <!-- Total Sub Admin -->
+    <div class="summary-card card-subadmin">
+      <div class="summary-card-top">
+        <span class="summary-title">Total Sub Admin</span>
+        <div class="summary-icon-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+      </div>
+      <div class="summary-count" id="count-total-subadmin">0</div>
+    </div>
+
+    <!-- Total Teacher -->
+    <div class="summary-card card-teacher">
+      <div class="summary-card-top">
+        <span class="summary-title">Total Teacher</span>
+        <div class="summary-icon-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+        </div>
+      </div>
+      <div class="summary-count" id="count-total-teacher">0</div>
+    </div>
+
+    <!-- Total Students -->
+    <div class="summary-card card-students">
+      <div class="summary-card-top">
+        <span class="summary-title">Total Students</span>
+        <div class="summary-icon-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+      </div>
+      <div class="summary-count" id="count-total-students">0</div>
+    </div>
+
+  </div>
+
+  <!-- 2. FILTERS CARD -->
+  <div class="filter-card">
+    <div class="filter-row-1">
+      <div class="filter-group">
+        <label class="filter-label" for="filter-role">Select Role</label>
+        <select id="filter-role" class="filter-control">
+          <option value="All Roles">All Roles</option>
+          <option value="Admin">Admin</option>
+          <option value="Sub Admin">Sub Admin</option>
+          <option value="Teacher">Teacher</option>
+          <option value="Students">Students</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="filter-type">Select Type</label>
+        <select id="filter-type" class="filter-control">
+          <option value="">All Type</option>
+          <option value="Approved">Approved</option>
+          <option value="Blocked">Blocked</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-row-2">
+      <div class="filter-group">
+        <label class="filter-label" for="filter-search">Search</label>
+        <input type="text" id="filter-search" class="filter-control" placeholder="Search by username, email, user id...">
+      </div>
+
+      <button class="btn btn-primary" id="btn-search-users" onclick="loadUsersList(1)">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Search</span>
+      </button>
+
+      <button class="btn btn-secondary" onclick="resetUserFilters()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-5.71-2.69-5.71-6s2.4-6 5.71-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        <span>Reset</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. USERS TABLE CARD -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Sr.</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th style="width: 70px; text-align: center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 25px; color: var(--text-muted);">Loading user records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION ROW -->
+    <div class="pagination-row">
+      <div class="pagination-info" id="pagination-info-text">Showing 0 users</div>
+      <div class="pagination-btns" id="pagination-controls">
+        <!-- Dynamic pagination buttons -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentUsersDataList = [];
+  let currentPageNumber = 1;
+  let activeOpenDropdownUserId = null;
+
+  async function loadUsersList(page = 1) {
+    currentPageNumber = page;
+    const filterRole = document.getElementById('filter-role').value;
+    const filterType = document.getElementById('filter-type').value;
+    const searchQuery = document.getElementById('filter-search').value.trim();
+
+    const tbody = document.getElementById('users-table-body');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 25px;"><div class="spinner" style="border-top-color:var(--primary); width:20px; height:20px; margin:0 auto 8px auto;"></div>Loading...</td></tr>`;
+
+    try {
+      const res = await ApiService.getUsersData(filterRole, filterType, searchQuery, page, 25);
+      if (res && res.status === 'success') {
+        currentUsersDataList = res.users || [];
+        renderSummary(res.summary);
+        renderUsersTable(res.users, res.currentPage, 25);
+        renderPagination(res.currentPage, res.totalPages, res.totalRecords);
+      } else {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 20px;">Unable to load user records.</td></tr>`;
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 20px;">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  function resetUserFilters() {
+    document.getElementById('filter-role').selectedIndex = 0;
+    document.getElementById('filter-type').selectedIndex = 0;
+    document.getElementById('filter-search').value = '';
+    loadUsersList(1);
+  }
+
+  function renderSummary(summary) {
+    if (!summary) return;
+    document.getElementById('count-total-users').innerText = summary.totalUsers || 0;
+    document.getElementById('count-total-admin').innerText = summary.totalAdmin || 0;
+    document.getElementById('count-total-subadmin').innerText = summary.totalSubAdmin || 0;
+    document.getElementById('count-total-teacher').innerText = summary.totalTeacher || 0;
+    document.getElementById('count-total-students').innerText = summary.totalStudents || 0;
+  }
+
+  function renderUsersTable(users, page, limit) {
+    const tbody = document.getElementById('users-table-body');
+    if (!users || users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 25px; color: var(--text-muted);">No user records found.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    users.forEach((u, index) => {
+      const srNo = (page - 1) * limit + (index + 1);
+      const isDeactivated = (u.status === 'Inactive' || u.status === 'Deactivated');
+      const rowClass = isDeactivated ? 'user-row-inactive' : '';
+
+      let roleBadgeClass = 'badge-student';
+      if (u.role === 'Admin') roleBadgeClass = 'badge-admin';
+      else if (u.role === 'Sub Admin') roleBadgeClass = 'badge-subadmin';
+      else if (u.role === 'Teacher') roleBadgeClass = 'badge-teacher';
+
+      const statusBadge = !isDeactivated 
+        ? `<span class="badge badge-active">Active</span>`
+        : `<span class="badge badge-inactive">Inactive</span>`;
+
+      const avatar = u.imageUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+      html += `
+        <tr class="${rowClass}">
+          <td>${srNo}</td>
+          <td>
+            <div class="user-cell">
+              <img src="${avatar}" class="user-cell-img" alt="Avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+              <div class="user-cell-info">
+                <span class="user-cell-name">${u.fullName || u.username}</span>
+                <span class="user-cell-id">${u.userId}</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge ${roleBadgeClass}">${u.role}</span></td>
+          <td>${statusBadge}</td>
+          <td style="text-align: center; position: relative;">
+            <button class="btn-action-menu" onclick="toggleActionDropdown(event, '${u.userId}')" title="Actions">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+
+            <div id="action-dropdown-${u.userId}" class="action-dropdown hidden">
+              <div class="action-item" onclick="handleShowPass('${u.userId}', '${u.username}')">
+                <svg class="icon" style="color:#2563eb;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                <span>Show Password</span>
+              </div>
+
+              <div class="action-item" onclick="triggerEditUser('${u.userId}')">
+                <svg class="icon" style="color:#f59e0b;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                <span>Edit</span>
+              </div>
+
+              <div class="action-item delete-item" onclick="triggerDeleteUser('${u.userId}', '${u.username}')">
+                <svg class="icon" style="color:#ef4444;" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                <span>Delete</span>
+              </div>
+
+              <div class="action-item" onclick="triggerToggleStatus('${u.userId}', '${u.status}')">
+                <svg class="icon" style="color:#9333ea;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                <span>${!isDeactivated ? 'Deactivate' : 'Activate'}</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function toggleActionDropdown(e, userId) {
+    e.stopPropagation();
+    const targetMenu = document.getElementById('action-dropdown-' + userId);
+
+    if (activeOpenDropdownUserId && activeOpenDropdownUserId !== userId) {
+      const prevMenu = document.getElementById('action-dropdown-' + activeOpenDropdownUserId);
+      if (prevMenu) prevMenu.classList.add('hidden');
+    }
+
+    if (targetMenu) {
+      targetMenu.classList.toggle('hidden');
+      activeOpenDropdownUserId = targetMenu.classList.contains('hidden') ? null : userId;
+    }
+  }
+
+  document.addEventListener('click', function() {
+    if (activeOpenDropdownUserId) {
+      const prevMenu = document.getElementById('action-dropdown-' + activeOpenDropdownUserId);
+      if (prevMenu) prevMenu.classList.add('hidden');
+      activeOpenDropdownUserId = null;
+    }
+  });
+
+  async function handleShowPass(userId, username) {
+    try {
+      const res = await ApiService.getUserPassword(userId);
+      if (res && res.status === 'success') {
+        showPasswordModal(username, res.password);
+      } else {
+        showToast(res.message || 'Unable to fetch password.', 'error');
+      }
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function triggerEditUser(userId) {
+    const user = currentUsersDataList.find(u => u.userId === userId);
+    if (user && typeof populateEditUserForm === 'function') {
+      populateEditUserForm(user);
+    }
+  }
+
+  function triggerDeleteUser(userId, username) {
+    showConfirmModal(
+      'Delete User Confirmation',
+      `Are you sure you want to delete user '${username}' (${userId})?`,
+      'Delete',
+      async function() {
+        try {
+          const res = await ApiService.deleteUser(userId);
+          if (res && res.status === 'success') {
+            showToast(res.message || 'User deleted successfully!', 'success');
+            loadUsersList(currentPageNumber);
+          } else {
+            showToast(res.message || 'Delete failed!', 'error');
+          }
+        } catch(err) {
+          showToast('Error: ' + err.message, 'error');
+        }
+      }
+    );
+  }
+
+  function triggerToggleStatus(userId, currentStatus) {
+    const isAct = (currentStatus === 'Active');
+    const actionName = isAct ? 'Deactivate' : 'Activate';
+
+    showConfirmModal(
+      `${actionName} User Confirmation`,
+      `Are you sure you want to ${actionName.toLowerCase()} user (${userId})?`,
+      actionName,
+      async function() {
+        try {
+          const res = await ApiService.toggleUserStatus(userId);
+          if (res && res.status === 'success') {
+            showToast(res.message || `Status changed to: ${res.newStatus}`, 'success');
+            loadUsersList(currentPageNumber);
+          } else {
+            showToast(res.message || 'Status change failed!', 'error');
+          }
+        } catch(err) {
+          showToast('Error: ' + err.message, 'error');
+        }
+      }
+    );
+  }
+
+  function renderPagination(currentPage, totalPages, totalRecords) {
+    const infoText = document.getElementById('pagination-info-text');
+    const container = document.getElementById('pagination-controls');
+    
+    if (infoText) {
+      const start = (currentPage - 1) * 25 + 1;
+      const end = Math.min(currentPage * 25, totalRecords || 0);
+      infoText.innerText = totalRecords > 0 ? `Showing ${start} to ${end} of ${totalRecords} users` : 'Showing 0 users';
+    }
+
+    if (!container || !totalPages || totalPages <= 1) {
+      if (container) container.innerHTML = '';
+      return;
+    }
+
+    let html = `
+      <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="loadUsersList(${currentPage - 1})">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </button>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadUsersList(${i})">${i}</button>`;
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        html += `<span style="font-size:11px; color:var(--text-muted);">...</span>`;
+      }
+    }
+
+    html += `
+      <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="loadUsersList(${currentPage + 1})">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </button>
+    `;
+
+    container.innerHTML = html;
+  }
+</script>
