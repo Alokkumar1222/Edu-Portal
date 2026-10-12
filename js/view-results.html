@@ -1,0 +1,797 @@
+<!-- ===================================================
+     EDU PORTAL - VIEW EXAM RESULTS & REVIEW (view-results.html)
+     =================================================== -->
+
+<style>
+  .result-page-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+    width: 100%;
+    word-break: break-word;
+  }
+
+  .result-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .result-header-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* User & Exam Info Banner */
+  .result-user-banner {
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .res-user-flex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .res-user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+  }
+
+  .res-exam-details-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .res-exam-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  .res-exam-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Summary Score Cards */
+  .result-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .res-stat-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .res-stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .res-stat-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .res-stat-val {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  /* Subject Wise Table */
+  .res-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+    white-space: nowrap;
+  }
+
+  .res-table th {
+    background-color: var(--bg-body);
+    color: var(--text-muted);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .res-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-weight: 500;
+  }
+
+  /* Questions Analysis Section */
+  .analysis-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .analysis-filter-bar::-webkit-scrollbar { display: none; }
+
+  .analysis-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .analysis-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .analysis-btn.active { background-color: var(--primary); color: #ffffff; border-color: var(--primary); }
+
+  /* Question Item Card */
+  .analysis-q-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--card-shadow);
+    word-break: break-word;
+  }
+
+  .q-status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .badge-q-right { background-color: #d1fae5; color: #059669; }
+  .badge-q-wrong { background-color: #ffe4e6; color: #e11d48; }
+  .badge-q-unattempted { background-color: #f1f5f9; color: #64748b; }
+
+  .ans-opt-box {
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-body);
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    word-break: break-word;
+    transition: all 0.2s ease;
+  }
+
+  /* Correct Option Green Styling when Show Answer is clicked */
+  .ans-opt-box.opt-correct {
+    border-color: #10b981 !important;
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+    font-weight: 700 !important;
+  }
+
+  .ans-opt-box.opt-wrong-selected {
+    border-color: #ef4444;
+    background-color: #ffe4e6;
+    color: #9f1239;
+    font-weight: 600;
+  }
+
+  @media (max-width: 992px) {
+    .result-summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="result-wrapper" id="exam-result-view-container">
+
+  <!-- 1. TOP HEADER BAR -->
+  <div class="result-header-bar">
+    <div class="result-header-title">
+      <button class="btn btn-secondary" onclick="navigateTo('start_exam')" style="padding:6px 12px;">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <span>Back to Exams</span>
+      </button>
+      <span>View Exam Results</span>
+    </div>
+
+    <button class="btn btn-secondary" onclick="loadExamResultData()" title="Refresh Result">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-5.71-2.69-5.71-6s2.4-6 5.71-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+    </button>
+  </div>
+
+  <!-- REATTEMPT PRACTICE NOTICE -->
+  <div id="res-reattempt-notice" class="hidden card" style="background-color:#fffbeb; border-color:#fde68a; color:#b45309; padding:12px 18px; margin-bottom:16px; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:10px;">
+    <svg class="icon" style="color:#d97706;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span>Practice Re-attempt Mode: Yeh aapka practice attempt tha. Yeh result immediate view ke liye hai aur permanent ranking me save nahi hoga.</span>
+  </div>
+
+  <!-- 2. USER & EXAM BANNER -->
+  <div class="result-user-banner">
+    <div class="res-user-flex">
+      <img id="res-user-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="res-user-avatar" alt="Avatar">
+      <div>
+        <div id="res-user-name" style="font-size:17px; font-weight:700; color:var(--text-main);">User Name</div>
+        <div id="res-user-id" style="font-size:11px; color:var(--text-muted);">USR001</div>
+      </div>
+    </div>
+
+    <div class="res-exam-details-box">
+      <div class="flex items-center gap-2" style="flex-wrap:wrap;">
+        <span id="res-exam-title" class="res-exam-title">Exam Name</span>
+        <span id="res-exam-type-badge" class="badge badge-student">JEE Mains</span>
+      </div>
+
+      <div class="res-exam-meta">
+        <span>Submitted: <strong id="res-submit-date">-</strong></span> &bull;
+        <span>Duration: <strong id="res-duration">60</strong> min</span> &bull;
+        <span>Total Questions: <strong id="res-total-q">50</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SUMMARY SCORE CARDS -->
+  <div class="result-summary-grid">
+    
+    <!-- Pass/Fail Badge Card -->
+    <div class="res-stat-card">
+      <div id="res-status-icon-box" class="res-stat-icon" style="background:#d1fae5; color:#059669;">
+        <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div>
+        <div class="res-stat-title">Result Status</div>
+        <div id="res-status-text" class="res-stat-val" style="color:#059669;">Pass (78%)</div>
+      </div>
+    </div>
+
+    <!-- Total Score Card -->
+    <div class="res-stat-card">
+      <div class="res-stat-icon" style="background:#eff6ff; color:#2563eb;">
+        <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V18H9v2h6v-2h-2v-2.1c2.12-.39 3.79-2.02 4.39-4.1C19.08 11.63 21 9.55 21 7V5c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+      </div>
+      <div>
+        <div class="res-stat-title">Total Score</div>
+        <div id="res-score-text" class="res-stat-val">78 / 100</div>
+      </div>
+    </div>
+
+    <!-- Rank Card -->
+    <div class="res-stat-card">
+      <div class="res-stat-icon" style="background:#e0e7ff; color:#4f46e5;">
+        <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div>
+        <div class="res-stat-title">Your Rank</div>
+        <div id="res-rank-text" class="res-stat-val">5 / 125</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 4. SUBJECT WISE RESULT TABLE -->
+  <div class="result-page-card">
+    <div style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <span>Subject Wise Result</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th style="color:#059669;">Right Answer</th>
+            <th style="color:#e11d48;">Wrong Answer</th>
+            <th style="color:#64748b;">No Answer</th>
+            <th>Marks Obtained</th>
+          </tr>
+        </thead>
+        <tbody id="res-subject-tbody">
+          <!-- Dynamic subject rows -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5. QUESTIONS ANALYSIS SECTION -->
+  <div class="result-page-card" id="res-analysis-section">
+    <div style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      <span>Questions Analysis</span>
+    </div>
+
+    <!-- Subject Filters -->
+    <div class="analysis-filter-bar" id="res-analysis-filter-bar">
+      <!-- Dynamic Subject Buttons -->
+    </div>
+
+    <!-- Questions Analysis List -->
+    <div id="res-analysis-list-container">
+      <!-- Dynamic Question Cards -->
+    </div>
+  </div>
+
+</div>
+
+
+<!-- MODAL: ADD WRONG / UNANSWERED QUESTION TO MISTAKE BANK -->
+<div id="modal-add-question-to-mistake" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">Add Question to Mistake Bank</div>
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+      Yeh question Mistake Bank me add kiya ja raha hai. Mistake Types select karein:
+    </div>
+
+    <form onsubmit="event.preventDefault(); submitAddQuestionToMistake();">
+      <input type="hidden" id="res-mis-q-idx" value="">
+
+      <!-- Mistake Type Multi-Select -->
+      <div class="filter-group" style="margin-bottom:14px;">
+        <label class="filter-label">Select Mistake Type(s) *</label>
+        <div class="type-chk-grid" style="grid-template-columns:1fr;">
+          <label class="type-chk-item"><input type="checkbox" class="res-mis-type-chk" value="Calculation Mistakes"> Calculation Mistakes</label>
+          <label class="type-chk-item"><input type="checkbox" class="res-mis-type-chk" value="Formula Not Known"> Formula Not Known</label>
+          <label class="type-chk-item"><input type="checkbox" class="res-mis-type-chk" value="Concept Issue"> Concept Issue</label>
+          <label class="type-chk-item"><input type="checkbox" class="res-mis-type-chk" value="Question Understanding Issue" checked> Question Understanding Issue</label>
+        </div>
+      </div>
+
+      <!-- About Mistake Textarea -->
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">About Mistake (Optional)</label>
+        <textarea id="res-mis-about-text" class="filter-control w-full" rows="3" placeholder="Write optional notes about this mistake..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-question-to-mistake')">Cancel</button>
+        <button type="submit" id="btn-save-q-mistake" class="btn btn-primary">Save in Mistake Bank</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  let activeExamResultData = null;
+  let activeAnalysisQuestionList = [];
+  let activeAnalysisFilterSubject = 'All';
+  let activeMistakeQuestionIdx = null;
+
+  function showUserExamResultPage(examId, optionalResultObj) {
+    navigateTo('result');
+
+    if (optionalResultObj) {
+      activeExamResultData = optionalResultObj;
+      renderFullExamResultData(optionalResultObj);
+    } else {
+      loadExamResultData(examId);
+    }
+  }
+
+  async function loadExamResultData(examId) {
+    const user = window.AppState.currentUser;
+    if (!user) return;
+
+    showToast('Result data load ho raha hai...', 'info');
+
+    try {
+      const res = await ApiService.getUserExamResult(examId, user.userId);
+      if (res && res.status === 'success') {
+        activeExamResultData = res.result;
+        renderFullExamResultData(res.result);
+      } else {
+        showToast(res.message || 'Result fetch fail ho gaya!', 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function renderFullExamResultData(data) {
+    if (!data) return;
+
+    document.getElementById('res-user-name').innerText = data.userFullName || data.username;
+    document.getElementById('res-user-id').innerText = data.userId;
+    document.getElementById('res-user-img').src = data.userImageUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    document.getElementById('res-exam-title').innerText = data.examName;
+    document.getElementById('res-exam-type-badge').innerText = data.examType || 'Normal';
+    document.getElementById('res-submit-date').innerText = data.submittedAt ? data.submittedAt.split('T')[0] : '-';
+    document.getElementById('res-duration').innerText = data.durationMinutes || 60;
+    
+    activeAnalysisQuestionList = data.questionAnalysis || [];
+    document.getElementById('res-total-q').innerText = activeAnalysisQuestionList.length;
+
+    if (data.isReattempt) {
+      document.getElementById('res-reattempt-notice').classList.remove('hidden');
+    } else {
+      document.getElementById('res-reattempt-notice').classList.add('hidden');
+    }
+
+    const statusTextEl = document.getElementById('res-status-text');
+    const iconBoxEl = document.getElementById('res-status-icon-box');
+
+    if (data.isPassed) {
+      statusTextEl.innerText = `Pass (${data.percentage}%)`;
+      statusTextEl.style.color = '#059669';
+      iconBoxEl.style.backgroundColor = '#d1fae5';
+      iconBoxEl.style.color = '#059669';
+      iconBoxEl.innerHTML = `<svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+    } else {
+      statusTextEl.innerText = `Fail (${data.percentage}%)`;
+      statusTextEl.style.color = '#e11d48';
+      iconBoxEl.style.backgroundColor = '#ffe4e6';
+      iconBoxEl.style.color = '#e11d48';
+      iconBoxEl.innerHTML = `<svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+    }
+
+    document.getElementById('res-score-text').innerText = `${data.score} / ${data.totalMarks}`;
+
+    if (data.resultType === 'after_finished' && data.publicEndTime && new Date() < new Date(data.publicEndTime)) {
+      document.getElementById('res-rank-text').innerText = 'Locked (Exam Live)';
+    } else {
+      document.getElementById('res-rank-text').innerText = `${data.rank || 1} / ${data.totalSubmissions || 1}`;
+    }
+
+    renderResultSubjectTable(data.subjectStats);
+
+    const analysisSection = document.getElementById('res-analysis-section');
+    if (data.resultDisplay === 'only_marks') {
+      analysisSection.classList.add('hidden');
+    } else {
+      analysisSection.classList.remove('hidden');
+      renderAnalysisFilterButtons(activeAnalysisQuestionList);
+      renderQuestionAnalysisList(activeAnalysisQuestionList, 'All');
+    }
+  }
+
+  function renderResultSubjectTable(stats) {
+    const tbody = document.getElementById('res-subject-tbody');
+    if (!stats || Object.keys(stats).length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">Subject data available nahi hai.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    Object.keys(stats).forEach(sub => {
+      const item = stats[sub];
+      html += `
+        <tr>
+          <td><strong>${sub}</strong></td>
+          <td style="color:#059669; font-weight:700;">${item.right || 0}</td>
+          <td style="color:#e11d48; font-weight:700;">${item.wrong || 0}</td>
+          <td style="color:#64748b;">${item.unattempted || 0}</td>
+          <td><strong>${item.marks || 0}</strong></td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function renderAnalysisFilterButtons(qList) {
+    const container = document.getElementById('res-analysis-filter-bar');
+    if (!qList || qList.length === 0) return;
+
+    const subjects = ['All', ...new Set(qList.map(q => q.subject))];
+    activeAnalysisFilterSubject = 'All';
+
+    let html = '';
+    subjects.forEach(sub => {
+      let count = qList.length;
+      if (sub !== 'All') {
+        count = qList.filter(q => q.subject === sub).length;
+      }
+      const activeClass = (sub === 'All') ? 'active' : '';
+      html += `
+        <button class="analysis-btn ${activeClass}" onclick="filterAnalysisBySubject('${sub}', this)">
+          ${sub} (${count})
+        </button>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function filterAnalysisBySubject(sub, btnEl) {
+    activeAnalysisFilterSubject = sub;
+    const btns = document.querySelectorAll('.analysis-btn');
+    btns.forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+
+    if (activeAnalysisQuestionList) {
+      renderQuestionAnalysisList(activeAnalysisQuestionList, sub);
+    }
+  }
+
+  /* RENDER QUESTIONS ANALYSIS LIST (CORRECT ANSWERS HIDDEN INITIALLY) */
+  function renderQuestionAnalysisList(qList, subjectFilter) {
+    const container = document.getElementById('res-analysis-list-container');
+    if (!qList || qList.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Koi question analysis nahi mila.</div>`;
+      return;
+    }
+
+    let filtered = qList;
+    if (subjectFilter && subjectFilter !== 'All') {
+      filtered = qList.filter(q => q.subject === subjectFilter);
+    }
+
+    let html = '';
+    filtered.forEach((q, idx) => {
+      let badgeHtml = '';
+      const isWrongOrUnanswered = (q.status === 'wrong' || q.status === 'unattempted');
+
+      if (q.status === 'right') {
+        badgeHtml = `<span class="q-status-badge badge-q-right"><svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Right</span>`;
+      } else if (q.status === 'wrong') {
+        badgeHtml = `<span class="q-status-badge badge-q-wrong"><svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Wrong</span>`;
+      } else {
+        badgeHtml = `<span class="q-status-badge badge-q-unattempted">Not Attempted</span>`;
+      }
+
+      let optionsHtml = '';
+      if (q.questionType === 'integer') {
+        optionsHtml = `
+          <div style="font-size:13px; font-weight:600; margin-bottom:8px;">
+            <span>Your Answer: <strong style="color:var(--primary);">${q.userIntegerAnswer || 'Not Answered'}</strong></span>
+          </div>
+          <div id="res-ans-int-box-${idx}" class="hidden" style="font-size:13px; font-weight:700; color:#059669; background:#d1fae5; padding:6px 12px; border-radius:6px; margin-bottom:8px;">
+            Correct Integer Answer: ${q.integerAnswer}
+          </div>
+        `;
+      } else {
+        (q.options || []).forEach(opt => {
+          const isUserSel = (q.userSelectedOption === opt.id);
+          const isCorrect = opt.isCorrect;
+
+          let optClass = 'ans-opt-box';
+          let iconSvg = '';
+
+          if (isUserSel && !isCorrect) {
+            optClass += ' opt-wrong-selected';
+            iconSvg = `<svg class="icon" style="margin-left:auto; color:#e11d48;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+          }
+
+          optionsHtml += `
+            <div class="${optClass}" id="res-opt-box-${idx}-${opt.id}" data-correct="${isCorrect}">
+              <strong>(${opt.id})</strong>
+              <span>${opt.text}</span>
+              <span id="res-opt-icon-${idx}-${opt.id}">${iconSvg}</span>
+            </div>
+          `;
+        });
+      }
+
+      html += `
+        <div class="analysis-q-card">
+          <div class="flex items-center justify-between gap-2" style="margin-bottom:8px; flex-wrap:wrap;">
+            <div class="flex items-center gap-2">
+              ${badgeHtml}
+              <span class="badge badge-student">${q.subject || ''}</span>
+            </div>
+            ${q.isMarkedForReview ? `<span class="badge badge-subadmin">Marked for Review</span>` : ''}
+          </div>
+
+          <div style="font-size:14.5px; font-weight:700; color:var(--text-main); margin-bottom:10px;">
+            ${q.srNo || (idx + 1)}. ${q.questionText || ''}
+          </div>
+
+          ${q.imageUrl ? `<img src="${q.imageUrl}" style="max-height:160px; border-radius:6px; margin-bottom:10px; border:1px solid var(--border-color);">` : ''}
+
+          <div style="margin-bottom:10px;">${optionsHtml}</div>
+
+          <!-- Actions Row: Show Answer, View Explanation, Add to Mistake Bank -->
+          <div class="flex items-center justify-between gap-2" style="padding-top:10px; border-top:1px solid var(--border-color); flex-wrap:wrap;">
+            <div class="flex items-center gap-2">
+              <button class="btn btn-secondary" style="font-size:11.5px; padding:4px 10px;" id="btn-res-ans-${idx}" data-showing="false" onclick="toggleResultSingleAnswer('${idx}')">
+                Show Answer
+              </button>
+
+              ${q.explanation ? `
+                <button class="btn btn-secondary" style="font-size:11.5px; padding:4px 10px;" onclick="toggleAnalysisExplanation('${idx}')">
+                  View Explanation
+                </button>
+              ` : ''}
+            </div>
+
+            ${isWrongOrUnanswered ? `
+              <button class="btn btn-primary" style="font-size:11.5px; padding:4px 10px; background-color:#dc2626;" onclick="openAddQuestionToMistakeModal(${idx})">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <span>Add to Mistake Bank</span>
+              </button>
+            ` : ''}
+          </div>
+
+          ${q.explanation ? `
+            <div id="analysis-exp-${idx}" class="hidden" style="margin-top:10px; padding:10px; background-color:var(--bg-body); border-radius:6px; font-size:12.5px; color:var(--text-muted); border-left:3px solid var(--primary); word-break:break-word;">
+              <strong>Explanation:</strong> ${q.explanation}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise([container]);
+    }
+  }
+
+  /* SHOW ANSWER TOGGLE (TURNS CORRECT OPTION GREEN) */
+  function toggleResultSingleAnswer(idx) {
+    const q = activeAnalysisQuestionList[idx];
+    if (!q) return;
+
+    const btn = document.getElementById('btn-res-ans-' + idx);
+    const isShowing = btn && btn.getAttribute('data-showing') === 'true';
+
+    if (q.questionType === 'integer') {
+      const intBox = document.getElementById('res-ans-int-box-' + idx);
+      if (intBox) {
+        if (!isShowing) intBox.classList.remove('hidden');
+        else intBox.classList.add('hidden');
+      }
+    } else {
+      (q.options || []).forEach(opt => {
+        const optBox = document.getElementById(`res-opt-box-${idx}-${opt.id}`);
+        const iconSpan = document.getElementById(`res-opt-icon-${idx}-${opt.id}`);
+
+        if (opt.isCorrect) {
+          if (!isShowing) {
+            if (optBox) optBox.classList.add('opt-correct');
+            if (iconSpan) iconSpan.innerHTML = `<svg class="icon" style="margin-left:auto; color:#059669;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+          } else {
+            if (optBox) optBox.classList.remove('opt-correct');
+            if (iconSpan && !q.userSelectedOption) iconSpan.innerHTML = '';
+          }
+        }
+      });
+    }
+
+    if (!isShowing) {
+      if (btn) {
+        btn.setAttribute('data-showing', 'true');
+        btn.innerText = 'Hide Answer';
+      }
+    } else {
+      if (btn) {
+        btn.setAttribute('data-showing', 'false');
+        btn.innerText = 'Show Answer';
+      }
+    }
+  }
+
+  function toggleAnalysisExplanation(idx) {
+    const box = document.getElementById('analysis-exp-' + idx);
+    if (box) box.classList.toggle('hidden');
+  }
+
+  /* ADD WRONG / UNANSWERED QUESTION TO MISTAKE BANK */
+  function openAddQuestionToMistakeModal(qIdx) {
+    activeMistakeQuestionIdx = qIdx;
+    document.getElementById('res-mis-q-idx').value = qIdx;
+    document.getElementById('res-mis-about-text').value = '';
+
+    const chks = document.querySelectorAll('.res-mis-type-chk');
+    chks.forEach(c => c.checked = (c.value === 'Question Understanding Issue'));
+
+    document.getElementById('modal-add-question-to-mistake').classList.remove('hidden');
+  }
+
+  async function submitAddQuestionToMistake() {
+    const user = window.AppState.currentUser;
+    if (!user) {
+      showToast('Kripya login karein!', 'error');
+      return;
+    }
+
+    const q = activeAnalysisQuestionList[activeMistakeQuestionIdx];
+    if (!q) return;
+
+    const typeChks = document.querySelectorAll('.res-mis-type-chk:checked');
+    const mistakeTypes = Array.from(typeChks).map(c => c.value);
+    const aboutText = document.getElementById('res-mis-about-text').value.trim();
+
+    if (mistakeTypes.length === 0) {
+      showToast('Kripya kam se kam EK Mistake Type select karein!', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('btn-save-q-mistake');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="spinner"></div> <span>Adding...</span>`;
+
+    const payload = {
+      userId: user.userId,
+      className: q.className || "12",
+      subject: q.subject || "Physics",
+      chapterId: q.chapterId || "",
+      chapterName: q.chapterName || "",
+      sourceType: "Test Mistakes",
+      text: q.questionText || "",
+      imageUrl: q.imageUrl || "",
+      mistakeTypes: mistakeTypes,
+      aboutMistake: aboutText,
+      status: "Unsolved",
+      examId: activeExamResultData ? activeExamResultData.examId : "",
+      questionId: q.questionId,
+      questionObj: q
+    };
+
+    try {
+      const res = await ApiService.saveMistakeRecord(payload);
+      saveBtn.disabled = false;
+      saveBtn.innerText = 'Save in Mistake Bank';
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-question-to-mistake');
+      } else {
+        showToast(res.message || 'Mistake Bank me add nahi ho saka!', 'error');
+      }
+    } catch (err) {
+      saveBtn.disabled = false;
+      saveBtn.innerText = 'Save in Mistake Bank';
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+</script>
