@@ -1,0 +1,653 @@
+<!-- ===================================================
+     EDU PORTAL - AI QUESTIONS GENERATOR (ai_questions_generator.html)
+     =================================================== -->
+
+<style>
+  .ai-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .ai-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .ai-card-subtitle {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+  }
+
+  /* Level Checkbox Badges */
+  .level-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .level-chk-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    background-color: var(--bg-body);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+  }
+
+  .level-chk-label:hover { border-color: var(--primary); }
+
+  /* Question Display Card */
+  .ai-q-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--card-shadow);
+    transition: border-color 0.2s ease;
+    word-break: break-word;
+  }
+
+  .ai-q-card.selected-ai-q {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+  }
+
+  .level-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+  }
+
+  .level-easy { background-color: #d1fae5; color: #059669; }
+  .level-medium { background-color: #fef3c7; color: #d97706; }
+  .level-hard { background-color: #ffe4e6; color: #e11d48; }
+  .level-very-hard { background-color: #f3e8ff; color: #9333ea; }
+
+  /* Options Grid */
+  .ai-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .ai-option-box {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-body);
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-break: break-word;
+  }
+
+  .ai-option-box.opt-correct {
+    border-color: var(--success);
+    background-color: var(--success-light);
+    color: #065f46;
+    font-weight: 600;
+  }
+
+  /* Bottom Actions Sticky Bar */
+  .ai-bottom-bar {
+    position: sticky;
+    bottom: 16px;
+    background-color: #0f172a;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25);
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    animation: slideUp 0.25s ease;
+    font-size: 13px;
+  }
+
+  @media (max-width: 768px) {
+    .ai-options-grid { grid-template-columns: 1fr; }
+    .ai-bottom-bar { flex-direction: column; gap: 10px; text-align: center; border-radius: 16px; }
+  }
+</style>
+
+<div class="ai-gen-wrapper">
+  
+  <!-- 1. AI FORM CARD -->
+  <div class="ai-card">
+    <div class="ai-card-title">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span>AI Question Generator</span>
+    </div>
+    <div class="ai-card-subtitle">Generate high-quality exam questions instantly using Google Gemini AI with LaTeX math formulas & step-by-step solutions.</div>
+
+    <form id="ai-gen-form" onsubmit="event.preventDefault(); submitGenerateAIQuestions();">
+      
+      <!-- Optional Custom API Key Input -->
+      <div class="filter-group" style="background-color:var(--bg-body); padding:10px 12px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px;">
+        <label class="filter-label" for="ai-custom-key" style="margin-bottom:2px;">Custom Gemini API Key (Optional)</label>
+        <input type="password" id="ai-custom-key" class="filter-control w-full" placeholder="Leave blank to use default key, or paste your custom Gemini API key">
+      </div>
+
+      <!-- Row 1: Class, Subject, Chapter -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;" class="filter-group">
+        <div>
+          <label class="filter-label" for="ai-form-class">Select Class <span class="required">*</span></label>
+          <select id="ai-form-class" class="filter-control w-full" onchange="onAiClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label" for="ai-form-subject">Select Subject <span class="required">*</span></label>
+          <select id="ai-form-subject" class="filter-control w-full" onchange="onAiClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Biology">Biology</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label" for="ai-form-chapter">Select Chapter <span class="required">*</span></label>
+          <select id="ai-form-chapter" class="filter-control w-full" required>
+            <option value="" disabled selected hidden>Select chapter</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Levels Checkboxes & No. of Questions -->
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px; margin-top:10px;" class="filter-group">
+        <div>
+          <label class="filter-label">Select Difficulty Level(s) <span class="required">*</span></label>
+          <div class="level-checkbox-group">
+            <label class="level-chk-label">
+              <input type="checkbox" class="ai-level-chk" value="Easy"> Easy
+            </label>
+            <label class="level-chk-label">
+              <input type="checkbox" class="ai-level-chk" value="Medium" checked> Medium
+            </label>
+            <label class="level-chk-label">
+              <input type="checkbox" class="ai-level-chk" value="Hard"> Hard
+            </label>
+            <label class="level-chk-label">
+              <input type="checkbox" class="ai-level-chk" value="Very Hard"> Very Hard
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="filter-label" for="ai-form-count">No. of Questions (Max 50) <span class="required">*</span></label>
+          <input type="number" id="ai-form-count" class="filter-control w-full" value="5" min="1" max="50" required>
+        </div>
+      </div>
+
+      <!-- Row 3: About Your Questions (Big Textarea) -->
+      <div class="filter-group" style="margin-top:10px; margin-bottom:14px;">
+        <label class="filter-label" for="ai-form-about">Enter About Your Questions / Topic Guidance</label>
+        <textarea id="ai-form-about" class="filter-control w-full" style="height:auto;" rows="3" placeholder="e.g. Focus on Faraday's law numericals, Lenz's law concepts, and direction of induced EMF..."></textarea>
+      </div>
+
+      <!-- Submit Generate Button -->
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="submit" id="btn-generate-ai" class="btn btn-primary" style="padding:10px 24px; font-size:14px;">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L21.5 5l-1.25-1.25L19 1l-1.25 2.75L16.5 5l1.25 1.25L19 9zm-7.5.5L9 4 6.5 9.5 2 12l4.5 2.5L9 20l2.5-5.5L16 12l-4.5-2.5z"/></svg>
+          <span>Generate Questions with AI</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- 2. GENERATED QUESTIONS DISPLAY CONTAINER -->
+  <div id="ai-results-display-container" class="hidden">
+    
+    <div class="flex items-center justify-between" style="margin-bottom:14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-main);">
+        Generated Questions (<span id="ai-res-count-badge">0</span>)
+      </div>
+      <label class="flex items-center gap-2" style="font-weight:600; cursor:pointer;">
+        <input type="checkbox" id="ai-select-all-chk" style="width:16px; height:16px;" onchange="toggleSelectAllAiQuestions(this.checked)">
+        <span>Select All</span>
+      </label>
+    </div>
+
+    <!-- Questions Cards Container -->
+    <div id="ai-questions-cards-list"></div>
+
+    <!-- 3. BOTTOM STICKY ACTION BAR -->
+    <div id="ai-bottom-actions-bar" class="ai-bottom-bar hidden">
+      <div><strong id="ai-selected-count-text">0</strong> Questions Selected</div>
+      
+      <div class="flex items-center gap-2">
+        <button class="btn btn-secondary" style="color:#ffffff; border-color:rgba(255,255,255,0.3);" onclick="saveSelectedAiQuestionsToBank()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span>Add Questions</span>
+        </button>
+
+        <button class="btn btn-primary" onclick="openAiAddToExamModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+          <span>Add Questions in Exam</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- MODAL: ADD AI QUESTIONS TO DRAFT EXAM -->
+<div id="modal-ai-add-to-exam" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 550px;">
+    <div class="modal-header">Select Draft Exam</div>
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Add <strong id="ai-exam-modal-que-count">0</strong> selected AI questions to exam:</div>
+
+    <div class="flex items-center gap-2" style="margin-bottom:12px;">
+      <input type="text" id="ai-draft-exam-search" class="filter-control" style="flex:1;" placeholder="Search exam name..." oninput="loadAiUserDraftExams()">
+      <select id="ai-draft-exam-sort" class="filter-control" style="width:140px;" onchange="loadAiUserDraftExams()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="no_questions">0 Questions Exam</option>
+      </select>
+    </div>
+
+    <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Sr.</th>
+            <th>Exam Name</th>
+            <th>Scheduled Time</th>
+            <th>Questions</th>
+            <th style="text-align:center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ai-draft-exams-tbody">
+          <tr><td colspan="5" style="text-align:center; padding:15px;">Loading draft exams...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-ai-add-to-exam')">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  let generatedAiQuestionsList = [];
+  let selectedAiQuestionIndicesSet = new Set();
+
+  function loadAIQuestionsGenerator() {
+    // Initializer if needed
+  }
+
+  async function onAiClassSubjectChange() {
+    const cls = document.getElementById('ai-form-class').value;
+    const sub = document.getElementById('ai-form-subject').value;
+    const chapSelect = document.getElementById('ai-form-chapter');
+
+    if (!cls || !sub) return;
+
+    chapSelect.innerHTML = `<option value="" disabled selected hidden>Loading chapters...</option>`;
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = `<option value="" disabled selected hidden>Select chapter</option>`;
+        res.chapters.forEach(c => {
+          html += `<option value="${c.id}" data-name="${c.chapterName}">${c.chapterName}</option>`;
+        });
+        chapSelect.innerHTML = html;
+      } else {
+        chapSelect.innerHTML = `<option value="" disabled selected hidden>No chapters found</option>`;
+      }
+    } catch(err) {
+      chapSelect.innerHTML = `<option value="" disabled selected hidden>Error loading chapters</option>`;
+    }
+  }
+
+  async function submitGenerateAIQuestions() {
+    const cls = document.getElementById('ai-form-class').value;
+    const sub = document.getElementById('ai-form-subject').value;
+    const chapSelect = document.getElementById('ai-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+
+    const levelCheckboxes = document.querySelectorAll('.ai-level-chk:checked');
+    const selectedLevels = Array.from(levelCheckboxes).map(cb => cb.value).join(', ');
+
+    const aboutText = document.getElementById('ai-form-about').value.trim();
+    const numQuestions = document.getElementById('ai-form-count').value;
+    const customApiKey = document.getElementById('ai-custom-key').value.trim();
+
+    if (!cls || !sub || !chapId) {
+      showToast('Please select Class, Subject, and Chapter!', 'error');
+      return;
+    }
+
+    if (!selectedLevels) {
+      showToast('Please select at least one Difficulty Level!', 'error');
+      return;
+    }
+
+    const genBtn = document.getElementById('btn-generate-ai');
+    genBtn.disabled = true;
+    genBtn.innerHTML = `<div class="spinner"></div> <span>Generating Questions...</span>`;
+
+    const params = {
+      className: cls,
+      subject: sub,
+      chapterId: chapId,
+      chapterName: chapName,
+      levels: selectedLevels,
+      aboutText: aboutText,
+      numQuestions: numQuestions,
+      customApiKey: customApiKey
+    };
+
+    try {
+      const res = await ApiService.generateAIQuestions(params);
+      genBtn.disabled = false;
+      genBtn.innerHTML = `
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L21.5 5l-1.25-1.25L19 1l-1.25 2.75L16.5 5l1.25 1.25L19 9zm-7.5.5L9 4 6.5 9.5 2 12l4.5 2.5L9 20l2.5-5.5L16 12l-4.5-2.5z"/></svg>
+        <span>Generate Questions with AI</span>
+      `;
+
+      if (res && res.status === 'success' && res.questions) {
+        generatedAiQuestionsList = res.questions;
+        selectedAiQuestionIndicesSet.clear();
+
+        generatedAiQuestionsList.forEach((_, idx) => selectedAiQuestionIndicesSet.add(idx));
+
+        document.getElementById('ai-res-count-badge').innerText = generatedAiQuestionsList.length;
+        document.getElementById('ai-select-all-chk').checked = true;
+
+        renderGeneratedAiQuestionsList(generatedAiQuestionsList);
+        document.getElementById('ai-results-display-container').classList.remove('hidden');
+
+        if (res.notice) {
+          showToast(res.notice, 'info');
+        } else {
+          showToast(`${generatedAiQuestionsList.length} Questions successfully generated!`, 'success');
+        }
+      } else {
+        showToast('AI Error: ' + (res.message || 'Error'), 'error');
+      }
+    } catch(err) {
+      genBtn.disabled = false;
+      genBtn.innerHTML = `<span>Generate Questions with AI</span>`;
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function renderGeneratedAiQuestionsList(questions) {
+    const container = document.getElementById('ai-questions-cards-list');
+    if (!questions || questions.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:30px; color:var(--text-muted);">No questions generated.</div>`;
+      return;
+    }
+
+    let html = '';
+    questions.forEach((q, idx) => {
+      const isSelected = selectedAiQuestionIndicesSet.has(idx);
+      const cardClass = isSelected ? 'ai-q-card selected-ai-q' : 'ai-q-card';
+
+      const levelStr = q.level || 'Medium';
+      let levelClass = 'level-medium';
+      if (levelStr === 'Easy') levelClass = 'level-easy';
+      else if (levelStr === 'Hard') levelClass = 'level-hard';
+      else if (levelStr === 'Very Hard') levelClass = 'level-very-hard';
+
+      let optionsHtml = '<div class="ai-options-grid">';
+      (q.options || []).forEach(opt => {
+        const isCorrect = opt.isCorrect;
+        const optClass = isCorrect ? 'ai-option-box opt-correct' : 'ai-option-box';
+        optionsHtml += `
+          <div class="${optClass}">
+            <strong>(${opt.id})</strong>
+            <span>${opt.text}</span>
+            ${isCorrect ? `<svg class="icon" style="margin-left:auto; color:var(--success);" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>` : ''}
+          </div>
+        `;
+      });
+      optionsHtml += '</div>';
+
+      html += `
+        <div class="${cardClass}" id="ai-card-${idx}">
+          <div class="flex items-center justify-between gap-2" style="margin-bottom:8px;">
+            <span class="level-badge ${levelClass}">${levelStr}</span>
+            <label class="flex items-center gap-2" style="font-weight:600; cursor:pointer;">
+              <input type="checkbox" onchange="toggleSelectAiQuestionIndex(${idx})" ${isSelected ? 'checked' : ''}>
+              <span>Select Question</span>
+            </label>
+          </div>
+
+          <div style="font-size:14.5px; font-weight:700; color:var(--text-main); margin-bottom:10px;">
+            ${idx + 1}. ${q.questionText || ''}
+          </div>
+
+          ${optionsHtml}
+
+          ${q.explanation ? `
+            <div style="margin-top:10px;">
+              <button class="btn btn-secondary" style="font-size:11.5px; padding:4px 10px;" onclick="toggleAiExplanation('${idx}')">
+                Show Step-by-Step Explanation
+              </button>
+              <div id="ai-exp-box-${idx}" class="hidden" style="margin-top:8px; padding:10px; background-color:var(--bg-body); border-radius:6px; font-size:12.5px; color:var(--text-muted); border-left:3px solid var(--primary);">
+                <strong>Explanation:</strong> ${q.explanation}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+    updateAiStickyBar();
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise();
+    }
+  }
+
+  function toggleAiExplanation(idx) {
+    const box = document.getElementById('ai-exp-box-' + idx);
+    if (box) box.classList.toggle('hidden');
+  }
+
+  function toggleSelectAiQuestionIndex(idx) {
+    if (selectedAiQuestionIndicesSet.has(idx)) {
+      selectedAiQuestionIndicesSet.delete(idx);
+    } else {
+      selectedAiQuestionIndicesSet.add(idx);
+    }
+
+    const card = document.getElementById('ai-card-' + idx);
+    if (card) {
+      if (selectedAiQuestionIndicesSet.has(idx)) card.classList.add('selected-ai-q');
+      else card.classList.remove('selected-ai-q');
+    }
+
+    updateAiStickyBar();
+  }
+
+  function toggleSelectAllAiQuestions(isChecked) {
+    selectedAiQuestionIndicesSet.clear();
+    if (isChecked) {
+      generatedAiQuestionsList.forEach((_, idx) => selectedAiQuestionIndicesSet.add(idx));
+    }
+    renderGeneratedAiQuestionsList(generatedAiQuestionsList);
+  }
+
+  function updateAiStickyBar() {
+    const count = selectedAiQuestionIndicesSet.size;
+    document.getElementById('ai-selected-count-text').innerText = count;
+    const bar = document.getElementById('ai-bottom-actions-bar');
+    if (count > 0) bar.classList.remove('hidden');
+    else bar.classList.add('hidden');
+  }
+
+  async function saveSelectedAiQuestionsToBank() {
+    const selectedQuestions = Array.from(selectedAiQuestionIndicesSet).map(idx => generatedAiQuestionsList[idx]);
+    if (selectedQuestions.length === 0) {
+      showToast('Please select at least one question!', 'error');
+      return;
+    }
+
+    const cls = document.getElementById('ai-form-class').value;
+    const sub = document.getElementById('ai-form-subject').value;
+    const chapSelect = document.getElementById('ai-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+    const userId = window.AppState.currentUser ? window.AppState.currentUser.userId : '';
+
+    showToast('Saving questions to Question Bank...', 'info');
+
+    try {
+      const res = await ApiService.saveAIQuestionsBatch({
+        questionsArray: selectedQuestions,
+        className: cls,
+        subject: sub,
+        chapterId: chapId,
+        chapterName: chapName,
+        createdBy: userId
+      });
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+      } else {
+        showToast('Save Error: ' + res.message, 'error');
+      }
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function openAiAddToExamModal() {
+    const count = selectedAiQuestionIndicesSet.size;
+    if (count === 0) {
+      showToast('Please select at least one question!', 'error');
+      return;
+    }
+
+    document.getElementById('ai-exam-modal-que-count').innerText = count;
+    document.getElementById('modal-ai-add-to-exam').classList.remove('hidden');
+    loadAiUserDraftExams();
+  }
+
+  async function loadAiUserDraftExams() {
+    const q = document.getElementById('ai-draft-exam-search').value;
+    const sort = document.getElementById('ai-draft-exam-sort').value;
+    const userId = window.AppState.currentUser ? window.AppState.currentUser.userId : '';
+
+    const tbody = document.getElementById('ai-draft-exams-tbody');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px;">Loading draft exams...</td></tr>`;
+
+    try {
+      const res = await ApiService.getUserDraftExamsList(userId, q, sort);
+      if (res && res.status === 'success') {
+        renderAiDraftExamsTable(res.exams);
+      }
+    } catch(err) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:15px;">Error loading draft exams.</td></tr>`;
+    }
+  }
+
+  function renderAiDraftExamsTable(list) {
+    const tbody = document.getElementById('ai-draft-exams-tbody');
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">No draft exams found. Please create an exam first.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach((e, idx) => {
+      const qCount = e.questionIds ? e.questionIds.length : 0;
+      html += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${e.examName}</strong></td>
+          <td>${e.scheduledTime || 'Not Scheduled'}</td>
+          <td><span class="badge badge-student">${qCount} Questions</span></td>
+          <td style="text-align:center;">
+            <button class="btn btn-primary" style="padding:4px 8px; font-size:11.5px;" onclick="addAiQuestionsToExamTrigger('${e.id}')">
+              Add Questions
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  async function addAiQuestionsToExamTrigger(examId) {
+    const selectedQuestions = Array.from(selectedAiQuestionIndicesSet).map(idx => generatedAiQuestionsList[idx]);
+    if (selectedQuestions.length === 0) return;
+
+    const cls = document.getElementById('ai-form-class').value;
+    const sub = document.getElementById('ai-form-subject').value;
+    const chapSelect = document.getElementById('ai-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+    const userId = window.AppState.currentUser ? window.AppState.currentUser.userId : '';
+
+    showToast('Adding AI Questions to Question Bank and Exam...', 'info');
+
+    try {
+      const res = await ApiService.addAIQuestionsToExam({
+        questionsArray: selectedQuestions,
+        className: cls,
+        subject: sub,
+        chapterId: chapId,
+        chapterName: chapName,
+        examId: examId,
+        createdBy: userId
+      });
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-ai-add-to-exam');
+      } else {
+        showToast(res.message || 'Add failed!', 'error');
+      }
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+</script>
