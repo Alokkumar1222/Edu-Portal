@@ -1,0 +1,1467 @@
+<!-- ===================================================
+     EDU PORTAL - QUESTION BANK (question_bank.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar - Clean White Background (VRTX Style) */
+  .qb-sub-header {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface); /* Pure White #ffffff */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .qb-sub-header::-webkit-scrollbar {
+    display: none;
+  }
+
+  .qb-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .qb-tab-btn:hover { color: var(--primary); }
+  .qb-tab-btn.active { color: var(--primary) !important; font-weight: 600; }
+  .qb-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2.5px; background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Filter Grid */
+  .qb-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  /* Multi-select Chapter/Topic Checkbox Box */
+  .multiselect-box {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    background-color: var(--bg-body);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .multiselect-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    word-break: break-word;
+  }
+
+  /* Question Card Layout */
+  .question-item-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    transition: border-color 0.2s ease;
+    word-break: break-word;
+  }
+
+  .question-item-card.selected-question {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+  }
+
+  .qb-meta-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    background-color: var(--primary-light);
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+  }
+
+  .qb-question-text {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .qb-question-img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .qb-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .qb-option-box {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-body);
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-break: break-word;
+    transition: all 0.2s ease;
+  }
+
+  /* Correct Option Green Styling when Show Answer is clicked */
+  .qb-option-box.opt-correct {
+    border-color: var(--success) !important;
+    background-color: var(--success-light) !important;
+    color: #065f46 !important;
+    font-weight: 700 !important;
+  }
+
+  .qb-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Bottom Selection Sticky Bar */
+  .sticky-selection-bar {
+    position: fixed;
+    bottom: 16px;
+    left: calc(var(--sidebar-width) + 20px);
+    right: 20px;
+    background-color: #0f172a;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideUp 0.25s ease;
+    font-size: 13px;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Progress Bar */
+  .progress-bg {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary);
+    transition: width 0.2s ease;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1024px) {
+    .sticky-selection-bar { left: 16px; right: 16px; }
+    .qb-filter-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .qb-filter-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .qb-filter-grid { grid-template-columns: 1fr; }
+    .qb-options-grid { grid-template-columns: 1fr; }
+    .sticky-selection-bar { flex-direction: column; gap: 10px; text-align: center; border-radius: 16px; }
+  }
+</style>
+
+<div class="qb-wrapper">
+
+  <!-- 1. FIXED WHITE SUB-HEADER -->
+  <div class="qb-sub-header">
+    <div style="font-weight: 700; font-size: 14px; border-right: 1px solid var(--border-color); padding-right:14px; display:flex; align-items:center; gap:6px;">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 11h-2v-2h2v2zm0-4h-2V6h2v3z"/></svg>
+      <span>Question Bank</span>
+    </div>
+    
+    <button id="qb-tab-questions" class="qb-tab-btn active" onclick="switchQbTab('questions')">
+      <span>Question Bank</span>
+    </button>
+
+    <button id="qb-tab-chapter" class="qb-tab-btn" onclick="switchQbTab('chapter')">
+      <span>Chapters</span>
+    </button>
+
+    <button id="qb-tab-topic" class="qb-tab-btn" onclick="switchQbTab('topic')">
+      <span>Topics</span>
+    </button>
+
+    <button id="qb-tab-exam" class="qb-tab-btn" onclick="navigateTo('exam')">
+      <span>View Exam</span>
+    </button>
+  </div>
+
+
+  <!-- ===================================================
+       SUB-PAGE 1: QUESTION BANK
+       =================================================== -->
+  <div id="sub-page-questions" class="qb-sub-page">
+    
+    <!-- Action Bar & Filters Card -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="flex items-center justify-between gap-2" style="flex-wrap:wrap; margin-bottom:14px;">
+        <div class="flex items-center gap-2" style="flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openAddQuestionModal()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Add Question</span>
+          </button>
+          
+          <button class="btn btn-secondary" onclick="openImportExcelModal()">
+            <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            <span>Import Excel</span>
+          </button>
+
+          <button class="btn btn-secondary" onclick="downloadSampleExcel()">
+            <svg class="icon" style="color:var(--success);" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Sample File</span>
+          </button>
+        </div>
+
+        <button class="btn btn-secondary" onclick="exportQuestionsToPDF()">
+          <svg class="icon" style="color:var(--danger);" viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v4zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5z"/></svg>
+          <span>Export PDF</span>
+        </button>
+      </div>
+
+      <!-- Responsive Filter Grid -->
+      <div class="qb-filter-grid">
+        <div>
+          <label class="filter-label">Select Class</label>
+          <select id="qb-filter-class" class="filter-control w-full" onchange="onQbFilterClassSubjectChange()">
+            <option value="">Select class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Subject</label>
+          <select id="qb-filter-subject" class="filter-control w-full" onchange="onQbFilterClassSubjectChange()">
+            <option value="">Select subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Biology">Biology</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Chapters (Multiple)</label>
+          <div class="multiselect-box" id="qb-filter-chapters-list">
+            <span style="color:var(--text-muted); font-size:11px;">Select Class & Subject</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="filter-label">Select Topics (Multiple)</label>
+          <div class="multiselect-box" id="qb-filter-topics-list">
+            <span style="color:var(--text-muted); font-size:11px;">Select Chapters first</span>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+          <button class="btn btn-primary w-full" id="btn-qb-search" onclick="fetchQuestionsWithLoader()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <span>Search</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOW ALL ANSWERS BAR (AFTER SEARCH) -->
+    <div id="show-all-answers-bar" class="hidden" style="margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div style="font-size:13px; font-weight:700; color:var(--text-main);" id="qb-questions-count-label">
+        Loaded Questions (0)
+      </div>
+      <button class="btn btn-secondary" id="btn-toggle-all-answers" onclick="toggleAllAnswers()">
+        <svg class="icon" style="color:var(--success);" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        <span id="txt-toggle-all-answers">Show All Answers</span>
+      </button>
+    </div>
+
+    <!-- Questions Display Container -->
+    <div id="questions-display-list">
+      <div class="card" style="text-align:center; padding: 35px 20px; color:var(--text-muted);">
+        Please select Class and Subject, then click the **Search** button.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       SUB-PAGE 2: CHAPTER MANAGEMENT (INCLUDED)
+       =================================================== -->
+  <div id="sub-page-chapter" class="qb-sub-page hidden">
+    <!-- Chapter Component Mounts Here -->
+  </div>
+
+
+  <!-- ===================================================
+       SUB-PAGE 3: TOPIC MANAGEMENT (INCLUDED)
+       =================================================== -->
+  <div id="sub-page-topic" class="qb-sub-page hidden">
+    <!-- Topic Component Mounts Here -->
+  </div>
+
+</div>
+
+
+<!-- ===================================================
+     MODALS & DIALOG BOXES
+     =================================================== -->
+
+<!-- 1. ADD QUESTION MODAL WITH TOPIC & DIFFICULTY -->
+<div id="modal-add-question" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 620px;">
+    <div class="modal-header" id="modal-que-title">Add Question</div>
+    <form onsubmit="event.preventDefault(); submitSaveQuestion();">
+      <input type="hidden" id="que-form-id" value="">
+
+      <!-- Row 1: Class, Subject, Chapter, Topic -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div>
+          <label class="filter-label">Class *</label>
+          <select id="que-form-class" class="filter-control w-full" onchange="onQueModalClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select class</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Subject *</label>
+          <select id="que-form-subject" class="filter-control w-full" onchange="onQueModalClassSubjectChange()" required>
+            <option value="" disabled selected hidden>Select subject</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Maths">Maths</option>
+            <option value="Biology">Biology</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div>
+          <label class="filter-label">Chapter *</label>
+          <select id="que-form-chapter" class="filter-control w-full" onchange="onQueModalChapterChange()" required>
+            <option value="" disabled selected hidden>Select chapter</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="filter-label">Topic *</label>
+          <select id="que-form-topic" class="filter-control w-full" required>
+            <option value="" disabled selected hidden>Select topic</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Difficulty Level Selection -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Difficulty Level *</label>
+        <select id="que-form-difficulty" class="filter-control w-full" required>
+          <option value="Easy">Easy</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="Hard">Hard</option>
+          <option value="Very Hard">Very Hard</option>
+        </select>
+      </div>
+
+      <!-- Question Text / Image -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Question Text (LaTeX Supported) / Image *</label>
+        <textarea id="que-form-text" class="filter-control w-full" style="height:auto;" rows="3" placeholder="Enter question text... (e.g. Find \int x^2 dx)"></textarea>
+      </div>
+
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Choose Question Image from Gallery (Optional)</label>
+        <input type="file" id="que-form-img-input" class="filter-control w-full" accept="image/*" onchange="handleQueImageUpload(event)">
+        <input type="hidden" id="que-form-img-url" value="">
+        <div id="que-img-preview-box" class="hidden" style="margin-top:6px;">
+          <img id="que-img-preview-el" src="" style="max-height:80px; border-radius:6px;">
+        </div>
+      </div>
+
+      <!-- 4 Options with Checkbox for Correct Answer -->
+      <div class="filter-group" style="margin-bottom:12px;">
+        <label class="filter-label">Enter Options (Check the correct option box) *</label>
+        
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="que-opt-chk-A" class="que-opt-chk" onclick="selectCorrectOption('A')">
+            <input type="text" id="que-opt-txt-A" class="filter-control w-full" placeholder="Option A text">
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="que-opt-chk-B" class="que-opt-chk" onclick="selectCorrectOption('B')">
+            <input type="text" id="que-opt-txt-B" class="filter-control w-full" placeholder="Option B text">
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="que-opt-chk-C" class="que-opt-chk" onclick="selectCorrectOption('C')">
+            <input type="text" id="que-opt-txt-C" class="filter-control w-full" placeholder="Option C text">
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="que-opt-chk-D" class="que-opt-chk" onclick="selectCorrectOption('D')">
+            <input type="text" id="que-opt-txt-D" class="filter-control w-full" placeholder="Option D text">
+          </div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="filter-group" style="margin-bottom:16px;">
+        <label class="filter-label">Explanation (Optional)</label>
+        <textarea id="que-form-exp" class="filter-control w-full" style="height:auto;" rows="2" placeholder="Enter detailed solution/explanation..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-question')">Cancel</button>
+        <button type="submit" id="btn-save-que" class="btn btn-primary">Save Question</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- 2. IMPORT EXCEL MODAL -->
+<div id="modal-import-excel" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">Import Questions from Excel</div>
+    
+    <div class="filter-group" style="margin-bottom:12px;">
+      <label class="filter-label">Select Class *</label>
+      <select id="imp-form-class" class="filter-control w-full" onchange="onImpModalClassSubjectChange()">
+        <option value="" disabled selected hidden>Select class</option>
+        <option value="11">Class 11</option>
+        <option value="12">Class 12</option>
+      </select>
+    </div>
+
+    <div class="filter-group" style="margin-bottom:12px;">
+      <label class="filter-label">Select Subject *</label>
+      <select id="imp-form-subject" class="filter-control w-full" onchange="onImpModalClassSubjectChange()">
+        <option value="" disabled selected hidden>Select subject</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Maths">Maths</option>
+        <option value="Biology">Biology</option>
+      </select>
+    </div>
+
+    <div class="filter-group" style="margin-bottom:12px;">
+      <label class="filter-label">Select Chapter *</label>
+      <select id="imp-form-chapter" class="filter-control w-full">
+        <option value="" disabled selected hidden>Select chapter</option>
+      </select>
+    </div>
+
+    <div class="filter-group" style="margin-bottom:16px;">
+      <label class="filter-label">Choose Excel File (.xlsx, .xls) *</label>
+      <input type="file" id="imp-file-input" class="filter-control w-full" accept=".xlsx, .xls">
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="imp-progress-box" class="hidden">
+      <div class="flex items-center justify-between" style="font-size:12px; font-weight:600;">
+        <span>Uploading Questions...</span>
+        <span id="imp-progress-text">0%</span>
+      </div>
+      <div class="progress-bg"><div id="imp-progress-fill" class="progress-fill"></div></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-import-excel')">Cancel</button>
+      <button type="button" id="btn-start-import" class="btn btn-primary" onclick="processExcelImport()">Upload Questions</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. ADD QUESTIONS TO DRAFT EXAM MODAL -->
+<div id="modal-add-to-exam" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 550px;">
+    <div class="modal-header">Select Draft Exam</div>
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Add <strong id="selected-que-count-badge">0</strong> selected questions to exam:</div>
+
+    <div class="flex items-center gap-2" style="margin-bottom:12px;">
+      <input type="text" id="draft-exam-search" class="filter-control" style="flex:1;" placeholder="Search exam name..." oninput="loadUserDraftExams()">
+      <select id="draft-exam-sort" class="filter-control" style="width:140px;" onchange="loadUserDraftExams()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="no_questions">0 Questions Exam</option>
+      </select>
+    </div>
+
+    <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Sr.</th>
+            <th>Exam Name</th>
+            <th>Scheduled Time</th>
+            <th>Questions</th>
+            <th style="text-align:center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="draft-exams-tbody">
+          <tr><td colspan="5" style="text-align:center; padding:15px;">Loading draft exams...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-to-exam')">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- BOTTOM STICKY BAR FOR SELECTED QUESTIONS -->
+<div id="sticky-selection-bar" class="sticky-selection-bar hidden">
+  <div><strong id="sticky-selected-count">0</strong> Questions Selected</div>
+  <button class="btn btn-primary" onclick="openAddToExamModal()">Add Questions in Exam</button>
+</div>
+
+
+<!-- HIDDEN PRINT/PDF EXPORT CONTAINER -->
+<div id="pdf-export-template" class="hidden" style="background:#ffffff; color:#000000; padding:20px; font-family:serif;"></div>
+
+<script>
+  let loadedQuestionsList = [];
+  let selectedQuestionIdsSet = new Set();
+  let selectedCorrectOptionLetter = 'A';
+  let isAllAnswersShowing = false;
+
+  function switchQbTab(tab) {
+    document.getElementById('sub-page-questions').classList.add('hidden');
+    document.getElementById('sub-page-chapter').classList.add('hidden');
+    document.getElementById('sub-page-topic').classList.add('hidden');
+    
+    document.getElementById('qb-tab-questions').classList.remove('active');
+    document.getElementById('qb-tab-chapter').classList.remove('active');
+    document.getElementById('qb-tab-topic').classList.remove('active');
+
+    if (tab === 'questions') {
+      document.getElementById('sub-page-questions').classList.remove('hidden');
+      document.getElementById('qb-tab-questions').classList.add('active');
+    } else if (tab === 'chapter') {
+      document.getElementById('sub-page-chapter').classList.remove('hidden');
+      document.getElementById('qb-tab-chapter').classList.add('active');
+      if (typeof loadChapterPage === 'function') loadChapterPage();
+    } else if (tab === 'topic') {
+      document.getElementById('sub-page-topic').classList.remove('hidden');
+      document.getElementById('qb-tab-topic').classList.add('active');
+      if (typeof loadTopicPage === 'function') loadTopicPage();
+    }
+  }
+
+  function loadQuestionBank() {
+    switchQbTab('questions');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+  }
+
+  /* DYNAMIC FILTERS & DROPDOWNS */
+  async function onQbFilterClassSubjectChange() {
+    const cls = document.getElementById('qb-filter-class').value;
+    const sub = document.getElementById('qb-filter-subject').value;
+    const chapBox = document.getElementById('qb-filter-chapters-list');
+    const topicBox = document.getElementById('qb-filter-topics-list');
+
+    if (!cls || !sub) {
+      chapBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Select Class & Subject</span>`;
+      topicBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Select Chapters first</span>`;
+      return;
+    }
+
+    chapBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Loading chapters...</span>`;
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = '';
+        res.chapters.forEach(c => {
+          html += `
+            <label class="multiselect-item">
+              <input type="checkbox" class="qb-chap-checkbox" value="${c.id}" onchange="onQbFilterChaptersSelectionChange()">
+              <span>${c.chapterName}</span>
+            </label>
+          `;
+        });
+        chapBox.innerHTML = html;
+      } else {
+        chapBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">No chapters found.</span>`;
+      }
+    } catch(err) {
+      chapBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Error loading chapters</span>`;
+    }
+  }
+
+  async function onQbFilterChaptersSelectionChange() {
+    const checkboxes = document.querySelectorAll('.qb-chap-checkbox:checked');
+    const selectedChapIds = Array.from(checkboxes).map(cb => cb.value);
+    const topicBox = document.getElementById('qb-filter-topics-list');
+
+    if (selectedChapIds.length === 0) {
+      topicBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Select Chapters first</span>`;
+      return;
+    }
+
+    topicBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Loading topics...</span>`;
+
+    try {
+      const res = await ApiService.getTopicsData('', '', selectedChapIds[0], '');
+      if (res && res.topics && res.topics.length > 0) {
+        let html = '';
+        res.topics.forEach(t => {
+          html += `
+            <label class="multiselect-item">
+              <input type="checkbox" class="qb-topic-checkbox" value="${t.id}">
+              <span>${t.topicName}</span>
+            </label>
+          `;
+        });
+        topicBox.innerHTML = html;
+      } else {
+        topicBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">No topics found.</span>`;
+      }
+    } catch(err) {
+      topicBox.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">Error loading topics</span>`;
+    }
+  }
+
+  async function fetchQuestionsWithLoader() {
+    const cls = document.getElementById('qb-filter-class').value;
+    const sub = document.getElementById('qb-filter-subject').value;
+    
+    const chapCbs = document.querySelectorAll('.qb-chap-checkbox:checked');
+    const selectedChapIds = Array.from(chapCbs).map(cb => cb.value);
+
+    const topicCbs = document.querySelectorAll('.qb-topic-checkbox:checked');
+    const selectedTopicIds = Array.from(topicCbs).map(cb => cb.value);
+
+    const btnSearch = document.getElementById('btn-qb-search');
+    btnSearch.disabled = true;
+    btnSearch.innerHTML = `<div class="spinner"></div> <span>Searching...</span>`;
+
+    const container = document.getElementById('questions-display-list');
+    container.innerHTML = `<div class="card" style="text-align:center; padding:30px;"><div class="spinner" style="border-top-color:var(--primary); width:20px; height:20px; margin:0 auto 8px auto;"></div>Loading questions...</div>`;
+
+    try {
+      const res = await ApiService.getQuestionsData(cls, sub, selectedChapIds, selectedTopicIds, [], '');
+      btnSearch.disabled = false;
+      btnSearch.innerHTML = `<span>Search</span>`;
+
+      if (res && res.status === 'success') {
+        loadedQuestionsList = res.questions || [];
+        isAllAnswersShowing = false;
+        
+        document.getElementById('qb-questions-count-label').innerText = `Loaded Questions (${loadedQuestionsList.length})`;
+        document.getElementById('txt-toggle-all-answers').innerText = 'Show All Answers';
+        document.getElementById('show-all-answers-bar').classList.remove('hidden');
+
+        renderQuestionsList(res.questions);
+      } else {
+        container.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Failed to load questions.</div>`;
+      }
+    } catch(err) {
+      btnSearch.disabled = false;
+      btnSearch.innerHTML = `<span>Search</span>`;
+      container.innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:20px;">Error: ${err.message}</div>`;
+    }
+  }
+
+
+  /* RENDER QUESTIONS LIST (ANSWERS HIDDEN BY DEFAULT) */
+  function renderQuestionsList(questions) {
+    const container = document.getElementById('questions-display-list');
+    if (!questions || questions.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">No questions found matching criteria.</div>`;
+      document.getElementById('show-all-answers-bar').classList.add('hidden');
+      return;
+    }
+
+    let html = '';
+    questions.forEach((q, idx) => {
+      const isChecked = selectedQuestionIdsSet.has(q.id);
+      const cardClass = isChecked ? 'question-item-card selected-question' : 'question-item-card';
+
+      const levelStr = q.difficulty || 'Medium';
+      let levelClass = 'level-medium';
+      if (levelStr === 'Easy') levelClass = 'level-easy';
+      else if (levelStr === 'Hard') levelClass = 'level-hard';
+      else if (levelStr === 'Very Hard') levelClass = 'level-very-hard';
+
+      let optionsHtml = '';
+      if (q.questionType === 'integer') {
+        optionsHtml = `
+          <div id="ans-integer-box-${q.id}" class="hidden" style="font-weight:700; color:#059669; background-color:#d1fae5; padding:8px 12px; border-radius:6px; margin-bottom:8px;">
+            Correct Integer Answer: ${q.integerAnswer || '-'}
+          </div>
+        `;
+      } else {
+        optionsHtml = `<div class="qb-options-grid">`;
+        (q.options || []).forEach(opt => {
+          optionsHtml += `
+            <div class="qb-option-box" id="opt-box-${q.id}-${opt.id}">
+              <strong>(${opt.id})</strong>
+              <span>${opt.text}</span>
+              <svg class="icon hidden" id="opt-icon-${q.id}-${opt.id}" style="margin-left:auto; color:var(--success);" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+          `;
+        });
+        optionsHtml += `</div>`;
+      }
+
+      html += `
+        <div class="${cardClass}" id="que-card-${q.id}">
+          <div class="flex items-center justify-between gap-2" style="margin-bottom:8px; flex-wrap:wrap;">
+            <div class="flex items-center gap-2" style="flex-wrap:wrap;">
+              <span class="qb-meta-badge">Class ${q.className} &bull; ${q.subject} &bull; ${q.chapterName || ''} ${q.topicName ? '&bull; ' + q.topicName : ''}</span>
+              <span class="level-badge ${levelClass}">${levelStr}</span>
+            </div>
+
+            <label class="flex items-center gap-2" style="font-weight:600; cursor:pointer;">
+              <input type="checkbox" onchange="toggleSelectQuestion('${q.id}')" ${isChecked ? 'checked' : ''}>
+              <span>Select Question</span>
+            </label>
+          </div>
+
+          <div class="qb-question-text">${idx + 1}. ${q.questionText || ''}</div>
+          ${q.imageUrl ? `<img src="${q.imageUrl}" class="qb-question-img">` : ''}
+
+          ${optionsHtml}
+
+          <div class="qb-card-actions">
+            <div class="flex items-center gap-2">
+              <button class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" id="btn-ans-${q.id}" data-showing="false" onclick="toggleSingleAnswer('${q.id}')">
+                Show Answer
+              </button>
+
+              ${q.explanation ? `<button class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="toggleExplanation('${q.id}')">Show Explanation</button>` : ''}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="editQuestionTrigger('${q.id}')">Edit</button>
+              <button class="btn btn-danger" style="padding:4px 10px; font-size:11.5px;" onclick="deleteQuestionTrigger('${q.id}')">Delete</button>
+            </div>
+          </div>
+
+          ${q.explanation ? `<div id="exp-box-${q.id}" class="hidden" style="margin-top:10px; padding:10px; background-color:var(--bg-body); border-radius:6px; font-size:12.5px; color:var(--text-muted); word-break:break-word;"><strong>Explanation:</strong> ${q.explanation}</div>` : ''}
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise();
+    }
+  }
+
+  function toggleSingleAnswer(qId) {
+    const q = loadedQuestionsList.find(item => item.id === qId);
+    if (!q) return;
+
+    const btn = document.getElementById('btn-ans-' + qId);
+    const isShowing = btn && btn.getAttribute('data-showing') === 'true';
+
+    if (q.questionType === 'integer') {
+      const intBox = document.getElementById('ans-integer-box-' + qId);
+      if (intBox) {
+        if (!isShowing) intBox.classList.remove('hidden');
+        else intBox.classList.add('hidden');
+      }
+    } else {
+      (q.options || []).forEach(opt => {
+        const optBox = document.getElementById(`opt-box-${qId}-${opt.id}`);
+        const iconCheck = document.getElementById(`opt-icon-${qId}-${opt.id}`);
+
+        if (opt.isCorrect) {
+          if (!isShowing) {
+            if (optBox) optBox.classList.add('opt-correct');
+            if (iconCheck) iconCheck.classList.remove('hidden');
+          } else {
+            if (optBox) optBox.classList.remove('opt-correct');
+            if (iconCheck) iconCheck.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    if (!isShowing) {
+      if (btn) {
+        btn.setAttribute('data-showing', 'true');
+        btn.innerText = 'Hide Answer';
+      }
+    } else {
+      if (btn) {
+        btn.setAttribute('data-showing', 'false');
+        btn.innerText = 'Show Answer';
+      }
+    }
+  }
+
+  function toggleAllAnswers() {
+    isAllAnswersShowing = !isAllAnswersShowing;
+    const txtEl = document.getElementById('txt-toggle-all-answers');
+
+    if (txtEl) {
+      txtEl.innerText = isAllAnswersShowing ? 'Hide All Answers' : 'Show All Answers';
+    }
+
+    loadedQuestionsList.forEach(q => {
+      const btn = document.getElementById('btn-ans-' + q.id);
+
+      if (q.questionType === 'integer') {
+        const intBox = document.getElementById('ans-integer-box-' + q.id);
+        if (intBox) {
+          if (isAllAnswersShowing) intBox.classList.remove('hidden');
+          else intBox.classList.add('hidden');
+        }
+      } else {
+        (q.options || []).forEach(opt => {
+          const optBox = document.getElementById(`opt-box-${q.id}-${opt.id}`);
+          const iconCheck = document.getElementById(`opt-icon-${q.id}-${opt.id}`);
+
+          if (opt.isCorrect) {
+            if (isAllAnswersShowing) {
+              if (optBox) optBox.classList.add('opt-correct');
+              if (iconCheck) iconCheck.classList.remove('hidden');
+            } else {
+              if (optBox) optBox.classList.remove('opt-correct');
+              if (iconCheck) iconCheck.classList.add('hidden');
+            }
+          }
+        });
+      }
+
+      if (btn) {
+        btn.setAttribute('data-showing', isAllAnswersShowing ? 'true' : 'false');
+        btn.innerText = isAllAnswersShowing ? 'Hide Answer' : 'Show Answer';
+      }
+    });
+  }
+
+  function toggleExplanation(id) {
+    const box = document.getElementById('exp-box-' + id);
+    if (box) box.classList.toggle('hidden');
+  }
+
+  function toggleSelectQuestion(id) {
+    if (selectedQuestionIdsSet.has(id)) {
+      selectedQuestionIdsSet.delete(id);
+    } else {
+      selectedQuestionIdsSet.add(id);
+    }
+
+    const card = document.getElementById('que-card-' + id);
+    if (card) {
+      if (selectedQuestionIdsSet.has(id)) card.classList.add('selected-question');
+      else card.classList.remove('selected-question');
+    }
+
+    updateStickySelectionBar();
+  }
+
+  function updateStickySelectionBar() {
+    const count = selectedQuestionIdsSet.size;
+    const bar = document.getElementById('sticky-selection-bar');
+    if (count > 0) {
+      document.getElementById('sticky-selected-count').innerText = count;
+      bar.classList.remove('hidden');
+    } else {
+      bar.classList.add('hidden');
+    }
+  }
+
+
+  /* ADD QUESTION MODAL */
+  function openAddQuestionModal() {
+    document.getElementById('que-form-id').value = '';
+    document.getElementById('que-form-text').value = '';
+    document.getElementById('que-form-img-url').value = '';
+    document.getElementById('que-img-preview-box').classList.add('hidden');
+    document.getElementById('que-form-exp').value = '';
+
+    document.getElementById('que-opt-txt-A').value = '';
+    document.getElementById('que-opt-txt-B').value = '';
+    document.getElementById('que-opt-txt-C').value = '';
+    document.getElementById('que-opt-txt-D').value = '';
+
+    selectCorrectOption('A');
+
+    const cls = document.getElementById('que-form-class').value;
+    const sub = document.getElementById('que-form-subject').value;
+    if (cls && sub) {
+      onQueModalClassSubjectChange();
+    }
+
+    document.getElementById('modal-add-question').classList.remove('hidden');
+  }
+
+  function selectCorrectOption(letter) {
+    selectedCorrectOptionLetter = letter;
+    ['A', 'B', 'C', 'D'].forEach(l => {
+      const chk = document.getElementById('que-opt-chk-' + l);
+      if (chk) chk.checked = (l === letter);
+    });
+  }
+
+  async function onQueModalClassSubjectChange() {
+    const cls = document.getElementById('que-form-class').value;
+    const sub = document.getElementById('que-form-subject').value;
+    const chapSelect = document.getElementById('que-form-chapter');
+
+    if (!cls || !sub) return;
+
+    chapSelect.innerHTML = `<option value="" disabled selected hidden>Loading chapters...</option>`;
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = `<option value="" disabled selected hidden>Select chapter</option>`;
+        res.chapters.forEach(c => {
+          html += `<option value="${c.id}" data-name="${c.chapterName}">${c.chapterName}</option>`;
+        });
+        chapSelect.innerHTML = html;
+      } else {
+        chapSelect.innerHTML = `<option value="" disabled selected hidden>No chapters found</option>`;
+      }
+    } catch(err) {
+      chapSelect.innerHTML = `<option value="" disabled selected hidden>Error loading chapters</option>`;
+    }
+  }
+
+  async function onQueModalChapterChange() {
+    const chapId = document.getElementById('que-form-chapter').value;
+    const topicSelect = document.getElementById('que-form-topic');
+
+    if (!chapId) return;
+
+    topicSelect.innerHTML = `<option value="" disabled selected hidden>Loading topics...</option>`;
+
+    try {
+      const res = await ApiService.getTopicsByChapter(chapId);
+      if (res && res.topics && res.topics.length > 0) {
+        let html = `<option value="" disabled selected hidden>Select topic</option>`;
+        res.topics.forEach(t => {
+          html += `<option value="${t.id}" data-name="${t.topicName}">${t.topicName}</option>`;
+        });
+        topicSelect.innerHTML = html;
+      } else {
+        topicSelect.innerHTML = `<option value="" disabled selected hidden>No topics found</option>`;
+      }
+    } catch(err) {
+      topicSelect.innerHTML = `<option value="" disabled selected hidden>Error loading topics</option>`;
+    }
+  }
+
+  function handleQueImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      const base64 = evt.target.result;
+      showToast('Uploading image...', 'info');
+
+      try {
+        const res = await ApiService.uploadImageToDrive(base64, 'que_' + Date.now() + '.png');
+        if (res && res.status === 'success') {
+          document.getElementById('que-form-img-url').value = res.url;
+          document.getElementById('que-img-preview-el').src = res.url;
+          document.getElementById('que-img-preview-box').classList.remove('hidden');
+          showToast('Image uploaded successfully!', 'success');
+        } else {
+          showToast('Upload failed: ' + res.message, 'error');
+        }
+      } catch(err) {
+        showToast('Upload error: ' + err.message, 'error');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function submitSaveQuestion() {
+    const id = document.getElementById('que-form-id').value;
+    const cls = document.getElementById('que-form-class').value;
+    const sub = document.getElementById('que-form-subject').value;
+    const chapSelect = document.getElementById('que-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+
+    const topicSelect = document.getElementById('que-form-topic');
+    const topicId = topicSelect.value;
+    const topicName = topicSelect.options[topicSelect.selectedIndex] ? topicSelect.options[topicSelect.selectedIndex].getAttribute('data-name') : '';
+
+    const difficulty = document.getElementById('que-form-difficulty').value;
+    const text = document.getElementById('que-form-text').value.trim();
+    const imgUrl = document.getElementById('que-form-img-url').value;
+    const exp = document.getElementById('que-form-exp').value.trim();
+
+    if (!text && !imgUrl) {
+      showToast('Please provide Question Text or an Image!', 'error');
+      return;
+    }
+
+    const options = [
+      { id: 'A', text: document.getElementById('que-opt-txt-A').value.trim(), isCorrect: (selectedCorrectOptionLetter === 'A') },
+      { id: 'B', text: document.getElementById('que-opt-txt-B').value.trim(), isCorrect: (selectedCorrectOptionLetter === 'B') },
+      { id: 'C', text: document.getElementById('que-opt-txt-C').value.trim(), isCorrect: (selectedCorrectOptionLetter === 'C') },
+      { id: 'D', text: document.getElementById('que-opt-txt-D').value.trim(), isCorrect: (selectedCorrectOptionLetter === 'D') }
+    ];
+
+    const btnSave = document.getElementById('btn-save-que');
+    btnSave.disabled = true;
+    btnSave.innerText = 'Saving...';
+
+    const qData = {
+      id: id,
+      className: cls,
+      subject: sub,
+      chapterId: chapId,
+      chapterName: chapName,
+      topicId: topicId,
+      topicName: topicName,
+      difficulty: difficulty,
+      questionType: 'objective',
+      questionText: text,
+      imageUrl: imgUrl,
+      options: options,
+      explanation: exp,
+      createdBy: window.AppState.currentUser ? window.AppState.currentUser.userId : ''
+    };
+
+    try {
+      const res = await ApiService.saveQuestion(qData);
+      btnSave.disabled = false;
+      btnSave.innerText = 'Save Question';
+
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-question');
+      } else {
+        showToast(res.message || 'Save failed!', 'error');
+      }
+    } catch(err) {
+      btnSave.disabled = false;
+      btnSave.innerText = 'Save Question';
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function editQuestionTrigger(id) {
+    const q = loadedQuestionsList.find(item => item.id === id);
+    if (!q) return;
+
+    document.getElementById('que-form-id').value = q.id;
+    document.getElementById('que-form-class').value = q.className;
+    document.getElementById('que-form-subject').value = q.subject;
+    onQueModalClassSubjectChange();
+
+    setTimeout(() => {
+      document.getElementById('que-form-chapter').value = q.chapterId;
+      onQueModalChapterChange();
+      setTimeout(() => {
+        document.getElementById('que-form-topic').value = q.topicId || '';
+      }, 400);
+    }, 400);
+
+    document.getElementById('que-form-difficulty').value = q.difficulty || 'Medium';
+    document.getElementById('que-form-text').value = q.questionText || '';
+    document.getElementById('que-form-img-url').value = q.imageUrl || '';
+    if (q.imageUrl) {
+      document.getElementById('que-img-preview-el').src = q.imageUrl;
+      document.getElementById('que-img-preview-box').classList.remove('hidden');
+    }
+
+    (q.options || []).forEach(opt => {
+      const txtInput = document.getElementById('que-opt-txt-' + opt.id);
+      if (txtInput) txtInput.value = opt.text || '';
+      if (opt.isCorrect) selectCorrectOption(opt.id);
+    });
+
+    document.getElementById('que-form-exp').value = q.explanation || '';
+    document.getElementById('modal-add-question').classList.remove('hidden');
+  }
+
+  function deleteQuestionTrigger(id) {
+    showConfirmModal('Delete Question', 'Are you sure you want to delete this question?', 'Delete', async function() {
+      try {
+        const res = await ApiService.deleteQuestion(id);
+        showToast(res.message, 'success');
+        fetchQuestionsWithLoader();
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+  }
+
+
+  /* EXCEL SAMPLE DOWNLOAD & IMPORT */
+  function downloadSampleExcel() {
+    const sampleData = [
+      {
+        "Question Text": "A circular loop of area A is placed in a uniform magnetic field B...",
+        "Question Image URL": "",
+        "Option A": "BA cos θ",
+        "Option B": "BA sin θ",
+        "Option C": "B/A cos θ",
+        "Option D": "B/A sin θ",
+        "Correct Option (A/B/C/D)": "D",
+        "Explanation": "According to magnetic flux definition...",
+        "Topics": "Magnetic Flux",
+        "Difficulty": "Medium"
+      }
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(sampleData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "QuestionsDemo");
+    XLSX.writeFile(workbook, "EduPortal_Questions_Sample.xlsx");
+    showToast('Sample Excel file downloaded!', 'success');
+  }
+
+  function openImportExcelModal() {
+    document.getElementById('imp-form-class').selectedIndex = 0;
+    document.getElementById('imp-form-subject').selectedIndex = 0;
+    document.getElementById('imp-form-chapter').innerHTML = `<option value="" disabled selected hidden>Select chapter</option>`;
+    document.getElementById('imp-file-input').value = '';
+    document.getElementById('imp-progress-box').classList.add('hidden');
+    document.getElementById('modal-import-excel').classList.remove('hidden');
+  }
+
+  async function onImpModalClassSubjectChange() {
+    const cls = document.getElementById('imp-form-class').value;
+    const sub = document.getElementById('imp-form-subject').value;
+    const chapSelect = document.getElementById('imp-form-chapter');
+
+    if (!cls || !sub) return;
+    chapSelect.innerHTML = `<option value="" disabled selected hidden>Loading chapters...</option>`;
+
+    try {
+      const res = await ApiService.getChaptersByClassAndSubject(cls, sub);
+      if (res && res.chapters && res.chapters.length > 0) {
+        let html = `<option value="" disabled selected hidden>Select chapter</option>`;
+        res.chapters.forEach(c => {
+          html += `<option value="${c.id}" data-name="${c.chapterName}">${c.chapterName}</option>`;
+        });
+        chapSelect.innerHTML = html;
+      } else {
+        chapSelect.innerHTML = `<option value="" disabled selected hidden>No chapters found</option>`;
+      }
+    } catch(err) {
+      chapSelect.innerHTML = `<option value="" disabled selected hidden>Error loading chapters</option>`;
+    }
+  }
+
+  function processExcelImport() {
+    const cls = document.getElementById('imp-form-class').value;
+    const sub = document.getElementById('imp-form-subject').value;
+    const chapSelect = document.getElementById('imp-form-chapter');
+    const chapId = chapSelect.value;
+    const chapName = chapSelect.options[chapSelect.selectedIndex] ? chapSelect.options[chapSelect.selectedIndex].getAttribute('data-name') : '';
+    const fileInput = document.getElementById('imp-file-input');
+
+    if (!cls || !sub || !chapId || !fileInput.files || fileInput.files.length === 0) {
+      showToast('Please select all required fields and choose an Excel file!', 'error');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    document.getElementById('imp-progress-box').classList.remove('hidden');
+    updateProgressBar(20);
+
+    reader.onload = async function(e) {
+      updateProgressBar(50);
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+      const questionsBatch = rows.map(r => {
+        const correctLetter = String(r["Correct Option (A/B/C/D)"] || "A").trim().toUpperCase();
+        return {
+          questionType: 'objective',
+          questionText: r["Question Text"] || "",
+          imageUrl: r["Question Image URL"] || "",
+          options: [
+            { id: 'A', text: r["Option A"] || "", isCorrect: (correctLetter === 'A') },
+            { id: 'B', text: r["Option B"] || "", isCorrect: (correctLetter === 'B') },
+            { id: 'C', text: r["Option C"] || "", isCorrect: (correctLetter === 'C') },
+            { id: 'D', text: r["Option D"] || "", isCorrect: (correctLetter === 'D') }
+          ],
+          explanation: r["Explanation"] || "",
+          topicName: r["Topics"] || "",
+          difficulty: r["Difficulty"] || "Medium"
+        };
+      });
+
+      updateProgressBar(75);
+
+      const createdBy = window.AppState.currentUser ? window.AppState.currentUser.userId : '';
+
+      try {
+        const res = await ApiService.importQuestionsBatch(questionsBatch, cls, sub, chapId, chapName, createdBy);
+        updateProgressBar(100);
+        setTimeout(() => {
+          if (res && res.status === 'success') {
+            showToast(res.message, 'success');
+            closeModal('modal-import-excel');
+          } else {
+            showToast('Import Error: ' + res.message, 'error');
+          }
+        }, 300);
+      } catch(err) {
+        showToast('Import Error: ' + err.message, 'error');
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  function updateProgressBar(percent) {
+    document.getElementById('imp-progress-text').innerText = percent + '%';
+    document.getElementById('imp-progress-fill').style.width = percent + '%';
+  }
+
+
+  /* EXPORT PDF FORMATTING */
+  function exportQuestionsToPDF() {
+    if (!loadedQuestionsList || loadedQuestionsList.length === 0) {
+      showToast('Please search and load questions before exporting!', 'error');
+      return;
+    }
+
+    showToast('Generating PDF file...', 'info');
+
+    const sample = loadedQuestionsList[0];
+    const className = sample.className || '12';
+    const subject = sample.subject || 'Physics';
+    const chapterName = sample.chapterName || 'Electromagnetic Induction';
+
+    const pdfContainer = document.getElementById('pdf-export-template');
+    pdfContainer.classList.remove('hidden');
+
+    let html = `
+      <div style="font-family:'Times New Roman', serif; color:#000; padding:16px; line-height:1.4;">
+        <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:12px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:bold;">
+            <span>Class: ${className}</span>
+            <span style="font-size:22px;">Subject: ${subject}</span>
+          </div>
+          <div style="font-size:26px; font-weight:bold; margin:14px 0;">${chapterName}</div>
+          <div style="font-size:15px; font-weight:bold;">No. of Questions: ${loadedQuestionsList.length}</div>
+        </div>
+
+        <div>
+    `;
+
+    loadedQuestionsList.forEach((q, idx) => {
+      html += `
+        <div style="margin-bottom:16px; page-break-inside:avoid;">
+          <div style="font-size:14px; font-weight:bold; margin-bottom:6px; word-break:break-word;">
+            ${idx + 1}. ${q.questionText || ''}
+          </div>
+          ${q.imageUrl ? `<img src="${q.imageUrl}" style="max-height:140px; display:block; margin-bottom:8px;">` : ''}
+
+          <div style="display:flex; justify-content:space-between; font-size:13px; flex-wrap:wrap; gap:8px;">
+      `;
+
+      (q.options || []).forEach(opt => {
+        const isCorrect = opt.isCorrect;
+        const style = isCorrect ? 'color:#16a34a; font-weight:bold;' : '';
+        html += `
+          <div style="${style}">
+            (${opt.id}) ${opt.text} ${isCorrect ? ' &#10004;' : ''}
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+
+    pdfContainer.innerHTML = html;
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise([pdfContainer]).then(() => {
+        triggerPDFDownload(pdfContainer, chapterName);
+      });
+    } else {
+      triggerPDFDownload(pdfContainer, chapterName);
+    }
+  }
+
+  function triggerPDFDownload(element, title) {
+    html2canvas(element, { scale: 2 }).then(canvas => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        doc.addPage();
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      doc.save(`${title}_Questions.pdf`);
+      element.classList.add('hidden');
+      showToast('PDF downloaded successfully!', 'success');
+    });
+  }
+
+
+  /* ADD QUESTIONS TO DRAFT EXAM DIALOG */
+  function openAddToExamModal() {
+    const count = selectedQuestionIdsSet.size;
+    document.getElementById('selected-que-count-badge').innerText = count;
+    document.getElementById('modal-add-to-exam').classList.remove('hidden');
+    loadUserDraftExams();
+  }
+
+  async function loadUserDraftExams() {
+    const q = document.getElementById('draft-exam-search').value;
+    const sort = document.getElementById('draft-exam-sort').value;
+    const userId = window.AppState.currentUser ? window.AppState.currentUser.userId : '';
+
+    const tbody = document.getElementById('draft-exams-tbody');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px;">Loading draft exams...</td></tr>`;
+
+    try {
+      const res = await ApiService.getUserDraftExamsList(userId, q, sort);
+      if (res && res.status === 'success') {
+        renderDraftExamsTable(res.exams);
+      }
+    } catch(err) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:15px;">Error loading draft exams.</td></tr>`;
+    }
+  }
+
+  function renderDraftExamsTable(list) {
+    const tbody = document.getElementById('draft-exams-tbody');
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">No draft exams found. Please create an exam first.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach((e, idx) => {
+      const qCount = e.questionIds ? e.questionIds.length : 0;
+      html += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${e.examName}</strong></td>
+          <td>${e.scheduledTime || 'Not Scheduled'}</td>
+          <td><span class="badge badge-student">${qCount} Questions</span></td>
+          <td style="text-align:center;">
+            <button class="btn btn-primary" style="padding:4px 8px; font-size:11.5px;" onclick="addQuestionsToExamTrigger('${e.id}')">
+              Add Questions
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  async function addQuestionsToExamTrigger(examId) {
+    const qArray = Array.from(selectedQuestionIdsSet);
+    if (qArray.length === 0) return;
+
+    try {
+      const res = await ApiService.addQuestionsToDraftExam(examId, qArray);
+      if (res && res.status === 'success') {
+        showToast(res.message, 'success');
+        closeModal('modal-add-to-exam');
+        selectedQuestionIdsSet.clear();
+        updateStickySelectionBar();
+        fetchQuestionsWithLoader();
+      } else {
+        showToast(res.message || 'Add failed!', 'error');
+      }
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+</script>
