@@ -1,0 +1,518 @@
+<!-- ===================================================
+     EDU PORTAL - START EXAM LIST PAGE (start_exam.html)
+     =================================================== -->
+
+<style>
+  /* Fixed Sub-Header Bar (VRTX White Style) */
+  .se-sub-header {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 890;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: var(--sub-header-height);
+    margin: -18px -20px 18px -20px;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .se-sub-header::-webkit-scrollbar { display: none; }
+
+  .se-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .se-tab-btn:hover { color: var(--primary); }
+  .se-tab-btn.active { color: var(--primary) !important; font-weight: 600; }
+  .se-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2.5px; background-color: var(--primary);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Exam Card List Item */
+  .se-exam-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .se-exam-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .se-exam-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .se-exam-type-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .se-exam-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .se-exam-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .se-exam-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  .se-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .se-exam-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Syllabus Sidebar Drawer */
+  .syllabus-drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 360px;
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    animation: slideLeft 0.25s ease;
+  }
+
+  @keyframes slideLeft {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  .syllabus-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .syllabus-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .syllabus-subject-box {
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+
+  .syllabus-subject-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .syllabus-chap-list {
+    list-style: disc;
+    padding-left: 18px;
+    font-size: 12px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .se-exam-card { flex-direction: column; align-items: stretch; }
+    .se-exam-actions { flex-direction: row; justify-content: space-between; align-items: center; }
+    .syllabus-drawer { width: 100%; }
+  }
+</style>
+
+<div class="se-wrapper">
+
+  <!-- 1. FIXED SUB-HEADER -->
+  <div class="se-sub-header">
+    <div style="font-weight:700; font-size:14px; border-right:1px solid var(--border-color); padding-right:14px; display:flex; align-items:center; gap:6px;">
+      <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <span>Start Exam</span>
+    </div>
+
+    <button id="se-tab-live" class="se-tab-btn active" onclick="switchStartExamTab('live')">
+      <svg class="icon" style="color:#ef4444;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      <span>Live Exams</span>
+    </button>
+
+    <button id="se-tab-upcoming" class="se-tab-btn" onclick="switchStartExamTab('upcoming')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+      <span>Upcoming Exams</span>
+    </button>
+  </div>
+
+  <!-- 2. SUB-PAGE LIVE EXAMS -->
+  <div id="se-page-live" class="se-sub-page">
+    <div style="margin-bottom:14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+        <span style="width:10px; height:10px; border-radius:50%; background-color:#ef4444; display:inline-block; animation:pulse 1.5s infinite;"></span>
+        <span>Live Exams</span>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Exams are currently available. Click on Start Exam to begin.</div>
+    </div>
+
+    <div id="se-live-exams-container">
+      <div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">Loading live exams...</div>
+    </div>
+  </div>
+
+  <!-- 3. SUB-PAGE UPCOMING EXAMS -->
+  <div id="se-page-upcoming" class="se-sub-page hidden">
+    <div style="margin-bottom:14px;">
+      <div style="font-size:15px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+        <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        <span>Upcoming Exams</span>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Exams scheduled in the next 3 days.</div>
+    </div>
+
+    <div id="se-upcoming-exams-container">
+      <div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">Loading upcoming exams...</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- SYLLABUS SIDEBAR DRAWER -->
+<div id="syllabus-drawer-overlay" class="modal-overlay hidden" onclick="closeSyllabusDrawer()">
+  <div class="syllabus-drawer" onclick="event.stopPropagation()">
+    <div class="syllabus-header">
+      <div style="font-size:15px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+        <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+        <span>Exam Syllabus</span>
+      </div>
+      <button class="mobile-close-btn" onclick="closeSyllabusDrawer()" style="color:var(--text-muted);">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+
+    <div style="padding:14px 18px; border-bottom:1px solid var(--border-color); background-color:var(--bg-body);">
+      <div id="syl-exam-name" style="font-size:15px; font-weight:700; color:var(--text-main);">Exam Name</div>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:3px;">
+        Duration: <span id="syl-duration">0</span> min &bull; Total Questions: <span id="syl-questions">0</span>
+      </div>
+    </div>
+
+    <div class="syllabus-body" id="syl-subjects-container">
+      <!-- Dynamic Subject Wise Chapters List -->
+    </div>
+
+    <div style="padding:14px 18px; border-top:1px solid var(--border-color);">
+      <button class="btn btn-secondary" style="width:100%;" onclick="closeSyllabusDrawer()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  let cachedLiveExams = [];
+  let cachedUpcomingExams = [];
+
+  function switchStartExamTab(tab) {
+    document.getElementById('se-page-live').classList.add('hidden');
+    document.getElementById('se-page-upcoming').classList.add('hidden');
+
+    document.getElementById('se-tab-live').classList.remove('active');
+    document.getElementById('se-tab-upcoming').classList.remove('active');
+
+    if (tab === 'live') {
+      document.getElementById('se-page-live').classList.remove('hidden');
+      document.getElementById('se-tab-live').classList.add('active');
+    } else {
+      document.getElementById('se-page-upcoming').classList.remove('hidden');
+      document.getElementById('se-tab-upcoming').classList.add('active');
+    }
+  }
+
+  function loadStartExamPage() {
+    switchStartExamTab('live');
+    fetchStartExamsData();
+  }
+
+  async function fetchStartExamsData() {
+    const user = window.AppState.currentUser;
+    if (!user) return;
+
+    try {
+      const res = await ApiService.getLiveAndUpcomingExams(user.userId);
+      if (res && res.status === 'success') {
+        cachedLiveExams = res.liveExams || [];
+        cachedUpcomingExams = res.upcomingExams || [];
+        renderLiveExamsList(cachedLiveExams);
+        renderUpcomingExamsList(cachedUpcomingExams);
+      } else {
+        document.getElementById('se-live-exams-container').innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:30px;">Failed to load live exams.</div>`;
+      }
+    } catch (err) {
+      document.getElementById('se-live-exams-container').innerHTML = `<div class="card" style="text-align:center; color:var(--danger); padding:30px;">Error: ${err.message}</div>`;
+    }
+  }
+
+  function renderLiveExamsList(list) {
+    const container = document.getElementById('se-live-exams-container');
+    if (!list || list.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">No Live Exams available currently.</div>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach(e => {
+      const typeBgMap = {
+        'JEE Mains': { bg: '#eff6ff', color: '#2563eb', badgeClass: 'badge-student' },
+        'NEET': { bg: '#d1fae5', color: '#059669', badgeClass: 'badge-live' },
+        'Normal': { bg: '#f3e8ff', color: '#9333ea', badgeClass: 'badge-scheduled' }
+      };
+      const typeStyle = typeBgMap[e.examType] || { bg: '#eff6ff', color: '#2563eb', badgeClass: 'badge-student' };
+
+      let mainActionBtnHtml = '';
+      if (!e.hasSubmitted) {
+        mainActionBtnHtml = `
+          <button class="btn btn-primary" onclick="launchOnlineExam('${e.id}', false)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span>Start Exam</span>
+          </button>
+        `;
+      } else if (e.canAttempt) {
+        mainActionBtnHtml = `
+          <button class="btn btn-primary" style="background-color:#d97706;" onclick="launchOnlineExam('${e.id}', true)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span>Reattempt Exam</span>
+          </button>
+          <button class="btn btn-secondary" onclick="openExamResultView('${e.id}')">View Result</button>
+        `;
+      } else {
+        mainActionBtnHtml = `
+          <button class="btn btn-primary" onclick="openExamResultView('${e.id}')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span>View Result</span>
+          </button>
+        `;
+      }
+
+      html += `
+        <div class="se-exam-card">
+          <div class="se-exam-left">
+            <div class="se-exam-type-icon" style="background-color:${typeStyle.bg}; color:${typeStyle.color};">
+              <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+            </div>
+
+            <div class="se-exam-details">
+              <div class="flex items-center gap-2">
+                <span class="se-exam-title">${e.examName}</span>
+                <span class="badge ${typeStyle.badgeClass}">${e.examType}</span>
+              </div>
+
+              <div class="se-exam-meta-row">
+                <span class="se-meta-item">
+                  <svg class="icon" style="width:15px; height:15px;" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                  <span>Duration: ${e.durationMinutes} min</span>
+                </span>
+
+                <span class="se-meta-item">
+                  <svg class="icon" style="width:15px; height:15px;" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                  <span>Start: ${formatDate(e.publicStartTime)}</span>
+                </span>
+
+                <span class="se-meta-item">
+                  <svg class="icon" style="width:15px; height:15px;" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                  <span>End: ${formatDate(e.publicEndTime)}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="se-exam-actions">
+            ${mainActionBtnHtml}
+            <button class="btn btn-secondary" style="font-size:11.5px; padding:5px 10px;" onclick="openExamSyllabusDrawer('${e.id}')">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+              <span>View Syllabus</span>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderUpcomingExamsList(list) {
+    const container = document.getElementById('se-upcoming-exams-container');
+    if (!list || list.length === 0) {
+      container.innerHTML = `<div class="card" style="text-align:center; padding:35px; color:var(--text-muted);">No upcoming exams scheduled in the next 3 days.</div>`;
+      return;
+    }
+
+    let html = '';
+    list.forEach(e => {
+      html += `
+        <div class="se-exam-card">
+          <div class="se-exam-left">
+            <div class="se-exam-type-icon" style="background-color:#fef3c7; color:#d97706;">
+              <svg class="icon" style="width:26px; height:26px;" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            </div>
+
+            <div class="se-exam-details">
+              <div class="flex items-center gap-2">
+                <span class="se-exam-title">${e.examName}</span>
+                <span class="badge badge-scheduled">Upcoming</span>
+              </div>
+
+              <div class="se-exam-meta-row">
+                <span>Duration: ${e.durationMinutes} min</span> &bull;
+                <span>Start: ${formatDate(e.publicStartTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="se-exam-actions">
+            <button class="btn btn-secondary" disabled>Upcoming</button>
+            <button class="btn btn-secondary" style="font-size:11.5px; padding:5px 10px;" onclick="openExamSyllabusDrawer('${e.id}')">View Syllabus</button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  async function openExamSyllabusDrawer(examId) {
+    const drawer = document.getElementById('syllabus-drawer-overlay');
+    const container = document.getElementById('syl-subjects-container');
+    container.innerHTML = `<div style="text-align:center; padding:20px;">Loading syllabus...</div>`;
+    drawer.classList.remove('hidden');
+
+    try {
+      const res = await ApiService.getExamSyllabus(examId);
+      if (res && res.status === 'success') {
+        document.getElementById('syl-exam-name').innerText = res.examName;
+        document.getElementById('syl-duration').innerText = res.duration || 60;
+        document.getElementById('syl-questions').innerText = res.totalQuestions || 0;
+
+        let html = '';
+        (res.syllabus || []).forEach(item => {
+          html += `
+            <div class="syllabus-subject-box">
+              <div class="syllabus-subject-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <span>${item.subject} (${item.chapters.length} chapters)</span>
+              </div>
+              <ul class="syllabus-chap-list">
+                ${item.chapters.map(c => `<li>${c}</li>`).join('')}
+              </ul>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = `<div style="color:var(--danger); text-align:center;">Failed to load syllabus.</div>`;
+      }
+    } catch (err) {
+      container.innerHTML = `<div style="color:var(--danger); text-align:center;">Error: ${err.message}</div>`;
+    }
+  }
+
+  function closeSyllabusDrawer() {
+    document.getElementById('syllabus-drawer-overlay').classList.add('hidden');
+  }
+
+  function formatDate(isoStr) {
+    if (!isoStr) return '-';
+    try {
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    } catch(e) {
+      return isoStr;
+    }
+  }
+
+  function launchOnlineExam(examId, isReattempt) {
+    if (typeof showFullscreenExamLoader === 'function') {
+      showFullscreenExamLoader('Loading Questions & Options... Please wait');
+    }
+    
+    setTimeout(() => {
+      if (typeof startOnlineTestSession === 'function') {
+        startOnlineTestSession(examId, isReattempt);
+      }
+    }, 300);
+  }
+
+  function openExamResultView(examId) {
+    if (typeof showUserExamResultPage === 'function') {
+      showUserExamResultPage(examId);
+    }
+  }
+</script>
