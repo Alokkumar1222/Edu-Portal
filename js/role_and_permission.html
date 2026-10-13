@@ -1,0 +1,246 @@
+<!-- ===================================================
+     EDU PORTAL - ROLE AND PERMISSION PAGE (role_and_permission.html)
+     =================================================== -->
+
+<style>
+  .role-perm-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .role-perm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .role-perm-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .perm-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .perm-matrix-table th {
+    background-color: var(--bg-body);
+    color: var(--text-muted);
+    padding: 12px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+  }
+
+  .perm-matrix-table th:first-child {
+    text-align: left;
+  }
+
+  .perm-matrix-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .perm-matrix-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .perm-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .perm-checkbox:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+
+<div class="role-perm-card">
+  
+  <!-- Header -->
+  <div class="role-perm-header">
+    <div>
+      <div class="role-perm-title">
+        <svg class="icon" style="color:var(--primary);" viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+        <span>Role and Permission Management</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--text-muted); margin-top:2px;">Configure page access permissions for each user role. Unchecked pages will be hidden from sidebar and dashboard.</div>
+    </div>
+
+    <!-- Save Button -->
+    <button id="btn-save-permissions" class="btn btn-primary" onclick="submitSaveRolePermissions()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+      <span>Save Permissions</span>
+    </button>
+  </div>
+
+  <!-- Permission Matrix Table -->
+  <div class="table-responsive">
+    <table class="perm-matrix-table">
+      <thead>
+        <tr>
+          <th>Page Name / Feature</th>
+          <th style="color:#dc2626;">Admin</th>
+          <th style="color:#c2410c;">Sub Admin</th>
+          <th style="color:#4338ca;">Teacher</th>
+          <th style="color:#15803d;">Students</th>
+        </tr>
+      </thead>
+      <tbody id="perm-matrix-tbody">
+        <!-- Matrix rows injected dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const systemPagesList = [
+    { id: "dashboard", name: "Dashboard" },
+    { id: "user_management", name: "User management" },
+    { id: "question_bank", name: "Question bank" },
+    { id: "manage_exam", name: "Manage exam" },
+    { id: "ai_features", name: "AI Features" },
+    { id: "study_material", name: "Study material" },
+    { id: "add_material_dialog", name: "└ Add Material Button & Actions" },
+    { id: "study_material_section", name: "└ Study Material Section Tab" },
+    { id: "laboratory", name: "Laboratory" },
+    { id: "start_exam", name: "Start exam" },
+    { id: "result", name: "Result 2.0" },
+    { id: "profile", name: "Profile" },
+    { id: "role_and_permission", name: "Role and permission" },
+    { id: "mistakes_bank", name: "Mistakes bank" },
+    { id: "ask_problems", name: "Ask Problems" },
+    { id: "questions_analysis", name: "Questions Analysis" },
+    { id: "retest_exam", name: "Retest Exam" },
+    { id: "setting", name: "Setting" }
+  ];
+
+  let currentRolePermissionsObj = {};
+
+  async function loadRoleAndPermissionPage() {
+    showToast('Loading permissions...', 'info');
+
+    try {
+      const res = await ApiService.getRolePermissions();
+      if (res && res.status === 'success') {
+        currentRolePermissionsObj = res.permissions || {};
+        renderPermissionsMatrixTable(currentRolePermissionsObj);
+      } else {
+        showToast('Failed to fetch permissions!', 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  function renderPermissionsMatrixTable(perms) {
+    const tbody = document.getElementById('perm-matrix-tbody');
+    let html = '';
+
+    systemPagesList.forEach(p => {
+      const pId = p.id;
+      const pagePerms = perms[pId] || { "Admin": true, "Sub Admin": true, "Teacher": true, "Students": true };
+
+      html += `
+        <tr>
+          <td>${p.name}</td>
+          
+          <!-- Admin (Always Checked & Disabled) -->
+          <td>
+            <input type="checkbox" class="perm-checkbox" checked disabled title="Admin always has full access">
+          </td>
+
+          <!-- Sub Admin -->
+          <td>
+            <input type="checkbox" class="perm-checkbox perm-chk-subadmin" data-page="${pId}" ${pagePerms["Sub Admin"] ? 'checked' : ''}>
+          </td>
+
+          <!-- Teacher -->
+          <td>
+            <input type="checkbox" class="perm-checkbox perm-chk-teacher" data-page="${pId}" ${pagePerms["Teacher"] ? 'checked' : ''}>
+          </td>
+
+          <!-- Students -->
+          <td>
+            <input type="checkbox" class="perm-checkbox perm-chk-student" data-page="${pId}" ${pagePerms["Students"] ? 'checked' : ''}>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  async function submitSaveRolePermissions() {
+    const updatedMatrix = {};
+
+    systemPagesList.forEach(p => {
+      const pId = p.id;
+
+      const subAdminChk = document.querySelector(`.perm-chk-subadmin[data-page="${pId}"]`);
+      const teacherChk = document.querySelector(`.perm-chk-teacher[data-page="${pId}"]`);
+      const studentChk = document.querySelector(`.perm-chk-student[data-page="${pId}"]`);
+
+      updatedMatrix[pId] = {
+        "Admin": true,
+        "Sub Admin": subAdminChk ? subAdminChk.checked : false,
+        "Teacher": teacherChk ? teacherChk.checked : false,
+        "Students": studentChk ? studentChk.checked : false
+      };
+    });
+
+    const saveBtn = document.getElementById('btn-save-permissions');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="spinner"></div> <span>Saving...</span>`;
+
+    try {
+      const res = await ApiService.saveRolePermissions(updatedMatrix);
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Permissions</span>`;
+
+      if (res && res.status === 'success') {
+        showToast(res.message || 'Permissions saved successfully!', 'success');
+        
+        window.AppState.rolePermissions = updatedMatrix;
+        if (typeof applyRolePermissionsUI === 'function') {
+          applyRolePermissionsUI();
+        }
+      } else {
+        showToast(res.message || 'Save permissions failed!', 'error');
+      }
+    } catch (err) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save Permissions</span>`;
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+</script>
